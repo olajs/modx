@@ -1,6 +1,10 @@
 # modx
 
-modx is a lightweight library to help developer use redux in a simple way
+Modx is a lightweight library to help developer use redux in a simple way.
+
+Just create a `model`, you can use it in `global redux state`,
+`Class Component` and `Function Component` , also easy to write
+`Unit Test` for `model` with `jest`.
 
 ### installation
 
@@ -11,15 +15,21 @@ $ yarn add @olajs/modx
 
 ## Usage
 
+- [create model](#create-model)
+- [simple use](#simple-use)
+- [used in React with react-redux](#used-in-react-with-react-redux)
+- [used in Class Component](#used-in-class-component)
+- [used in Function Component](#used-in-function-component)
+
 ### create model
 
 ```typescript
-// moduleA.ts
+// modelA.ts
 
 import { ModelConfig } from '@olajs/modx';
 
-const namespace = 'moduleA';
-const StateType = { counter: number };
+type StateType = { counter: number };
+const namespace = 'modelA';
 
 export { namespace, StateType };
 export default {
@@ -40,30 +50,30 @@ export default {
 // store.ts
 
 import { createStore } from '@olajs/modx';
-import modelA from './moduleA';
+import modelA, { namespace } from './modelA';
 
 const store = createStore({}, [modelA]);
 
-console.log(store.getState()[modelA.namespace]);
+console.log(store.getState()[namespace]);
 // { counter: 0 }
 
-store.dispatch({ type: `${modelA.namespace}/plus` });
-console.log(store.getState()[modelA.namespace]);
+store.dispatch({ type: `${namespace}/plus` });
+console.log(store.getState()[namespace]);
 // { counter: 1 }
 
-store.dispatch({ type: `${modelA.namespace}/plus` });
-console.log(store.getState()[modelA.namespace]);
+store.dispatch({ type: `${namespace}/plus` });
+console.log(store.getState()[namespace]);
 // { counter: 2 }
 
-store.dispatch({ type: `${modelA.namespace}/minus` });
-console.log(store.getState()[modelA.namespace]);
+store.dispatch({ type: `${namespace}/minus` });
+console.log(store.getState()[namespace]);
 // { counter: 1 }
 ```
 
-### use in React with react-redux
+### used in React with react-redux
 
 ```typescript jsx
-// App.ts
+// App.tsx
 
 import React from 'react';
 import { connect } from 'react-redux';
@@ -103,7 +113,7 @@ export default connect(mapStateToProps, mapDispatchToProps)(App);
 ```
 
 ```typescript jsx
-// main.ts
+// main.tsx
 
 import React from 'react';
 import ReactDom from 'react-dom';
@@ -120,4 +130,73 @@ ReactDom.render(
   </Provider>,
   document.getElementByid('app'),
 );
+```
+
+### used in Class Component
+
+```typescript jsx
+// withSingleModel.tsx
+
+import React from 'react';
+import { withSingleModel } from '@olajs/modx';
+import modelA, { StateType } from './modelA';
+
+type Dispatchers = {
+  plus();
+  minus();
+};
+
+type Props = {
+  state: StateType;
+  dispatchers: Dispatchers;
+};
+
+class WithSingleModel extends React.PureComponent<Props, any> {
+  render() {
+    const { state, dispatchers } = this.props.singleModel;
+
+    return (
+      <div>
+        {state.counter}
+        <br />
+        <button onClick={dispatchers.plus}>plus</button>
+        <br />
+        <button onClick={dispatchers.minus}>minus</button>
+      </div>
+    );
+  }
+}
+
+export default withSingleModel<StateType, Dispatchers>(modelA)(WithSingleModel);
+```
+
+### used in Function Component
+
+```typescript jsx
+// useSingleModel.tsx
+
+import React from 'react';
+import { useSingleModel } from '@olajs/modx';
+import modelA, { StateType } from './modelA';
+
+type Dispatchers = {
+  plus();
+  minus();
+};
+
+function UseSingleModel() {
+  const { state, dispatchers } = useSingleModel<StateType, Dispatchers>(modelA);
+
+  return (
+    <div>
+      {state.counter}
+      <br />
+      <button onClick={dispatchers.plus}>plus</button>
+      <br />
+      <button onClick={dispatchers.minus}>minus</button>
+    </div>
+  );
+}
+
+export default UseSingleModel;
 ```
