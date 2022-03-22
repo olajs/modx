@@ -18,8 +18,12 @@ $ yarn add @olajs/modx
 
 import { ModelConfig } from '@olajs/modx';
 
+const namespace = 'moduleA';
+const StateType = { counter: number };
+
+export { namespace, StateType };
 export default {
-  namespace: 'moduleA',
+  namespace,
   state: {
     counter: 0,
   },
@@ -30,11 +34,13 @@ export default {
 } as ModelConfig;
 ```
 
-### use in global redux state
+### simple use
 
 ```typescript
+// store.ts
+
 import { createStore } from '@olajs/modx';
-import modelA from './moduleA.ts';
+import modelA from './moduleA';
 
 const store = createStore({}, [modelA]);
 
@@ -52,4 +58,66 @@ console.log(store.getState()[modelA.namespace]);
 store.dispatch({ type: `${modelA.namespace}/minus` });
 console.log(store.getState()[modelA.namespace]);
 // { counter: 1 }
+```
+
+### use in React with react-redux
+
+```typescript jsx
+// App.ts
+
+import React from 'react';
+import { connect } from 'react-redux';
+import { namespace, StateType } from './modelA';
+
+type Props = {
+  state: StateType;
+  plus();
+  minus();
+};
+
+function App(props: Props) {
+  return (
+    <div>
+      {props.state.counter}
+      <br />
+      <button onClick={props.plus}>plus</button>
+      <br />
+      <button onClick={props.minus}>minus</button>
+    </div>
+  );
+}
+
+const mapStateToProps = (state) => ({
+  state: { ...state[namespace] },
+});
+const mapDispatchToProps = (dispatch) => ({
+  plus() {
+    dispatch({ type: `${namespace}/plus` });
+  },
+  minus() {
+    dispatch({ type: `${namespace}/minus` });
+  },
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);
+```
+
+```typescript jsx
+// main.ts
+
+import React from 'react';
+import ReactDom from 'react-dom';
+import { Provider } from 'react-redux';
+import { createStore } from '@olajs/modx';
+import modelA from './modelA';
+import App from './App';
+
+const store = createStore({}, [modelA]);
+
+ReactDom.render(
+  <Provider store={store}>
+    <App />
+  </Provider>,
+  document.getElementByid('app'),
+);
 ```
