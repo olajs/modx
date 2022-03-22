@@ -7,7 +7,12 @@ import { ModelConfig, ModelAction, EffectArgs, EffectFunction } from './types';
 /**
  * 创建一个 redux store 实例
  */
-function createStore(initialState: any, modelConfigs: ModelConfig[]): Store {
+function createStore(
+  initialState: any,
+  modelConfigs: ModelConfig[],
+  extra?: { devTools?: boolean },
+): Store {
+  const { devTools } = extra || {};
   const reducers = {};
   const middlewares = [];
 
@@ -25,7 +30,7 @@ function createStore(initialState: any, modelConfigs: ModelConfig[]): Store {
     }
   });
 
-  return configureStore({ initialState, reducers, middlewares });
+  return configureStore({ initialState, reducers, middlewares, devTools });
 }
 
 /**

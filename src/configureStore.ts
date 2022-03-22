@@ -43,6 +43,7 @@ function configureStoreProd({
   middlewares: Middleware[];
   reducers: { [key: string]: Reducer };
   initialState: any;
+  devTools?: boolean;
 }): Store {
   return createStore(
     combineReducers(reducers),

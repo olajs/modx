@@ -123,7 +123,7 @@ import { createStore } from '@olajs/modx';
 import modelA from './modelA';
 import App from './App';
 
-const store = createStore({}, [modelA]);
+const store = createStore({}, [modelA], { devTools: true });
 
 ReactDom.render(
   <Provider store={store}>
