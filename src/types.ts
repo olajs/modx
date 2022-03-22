@@ -4,11 +4,11 @@ type ModelAction<T = any> = AnyAction & {
   payload?: T;
 };
 
-type EffectArgs = {
+type EffectArgs<PayloadType = any> = {
   namespace: string;
   store: Store;
   next: Dispatch;
-  action: ModelAction;
+  action: ModelAction<PayloadType>;
 };
 
 type EffectFunction = (args: EffectArgs) => void;

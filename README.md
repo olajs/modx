@@ -6,7 +6,7 @@ Just create a `model`, you can use it in `global redux state`,
 `Class Component` and `Function Component` , also easy to write
 `Unit Test` for `model` with `jest`.
 
-### installation
+### Installation
 
 ```shell script
 $ npm install @olajs/modx --save
@@ -15,13 +15,14 @@ $ yarn add @olajs/modx
 
 ## Usage
 
-- [create model](#create-model)
-- [simple use](#simple-use)
-- [used in React with react-redux](#used-in-react-with-react-redux)
-- [used in Class Component](#used-in-class-component)
-- [used in Function Component](#used-in-function-component)
+- [Create model](#create-model)
+- [Simple use](#simple-use)
+- [Using in React with react-redux](#using-in-react-with-react-redux)
+- [Using in Class Component](#using-in-class-component)
+- [Using in Function Component](#using-in-function-component)
+- [Using async logic](#using-async-logic)
 
-### create model
+### Create model
 
 ```typescript
 // modelA.ts
@@ -36,15 +37,15 @@ export default {
   namespace,
   state: {
     counter: 0,
-  },
+  } as StateType,
   reducers: {
-    plus: (state) => ({ counter: state.counter + 1 }),
-    minus: (state) => ({ counter: state.counter - 1 }),
+    plus: (state: StateType) => ({ counter: state.counter + 1 }),
+    minus: (state: StateType) => ({ counter: state.counter - 1 }),
   },
 } as ModelConfig;
 ```
 
-### simple use
+### Simple use
 
 ```typescript
 // store.ts
@@ -70,7 +71,7 @@ console.log(store.getState()[namespace]);
 // { counter: 1 }
 ```
 
-### used in React with react-redux
+### Using in React with react-redux
 
 ```typescript jsx
 // App.tsx
@@ -132,7 +133,7 @@ ReactDom.render(
 );
 ```
 
-### used in Class Component
+### Using in Class Component
 
 ```typescript jsx
 // withSingleModel.tsx
@@ -170,7 +171,7 @@ class WithSingleModel extends React.PureComponent<Props, any> {
 export default withSingleModel<StateType, Dispatchers>(modelA)(WithSingleModel);
 ```
 
-### used in Function Component
+### Using in Function Component
 
 ```typescript jsx
 // useSingleModel.tsx
@@ -200,3 +201,71 @@ function UseSingleModel() {
 
 export default UseSingleModel;
 ```
+
+### Using async logic
+
+```typescript jsx
+// modelB.ts
+
+import { ModelConfig, EffectArgs } from '@olajs/modx';
+
+type StateType = { counter: number };
+const namespace = 'modelB';
+
+export { namespace, StateType };
+export default {
+  namespace,
+  state: {
+    counter: 0,
+  } as StateType,
+  reducers: {
+    plus: (state: StateType) => ({ counter: state.counter + 1 }),
+    minus: (state: StateType) => ({ counter: state.counter - 1 }),
+  },
+  effects: {
+    plusAsync({ namespace, next, action }: EffectArgs<{ timeout: number }>) {
+      setTimeout(() => {
+        next({ type: `${namespace}/plus` });
+      }, action.payload.timeout);
+    },
+    minusAsync({ namespace, next, action }: EffectArgs<{ timeout: number }>) {
+      setTimeout(() => {
+        next({ type: `${namespace}/minus` });
+      }, action.payload.timeout);
+    },
+  },
+} as ModelConfig;
+```
+
+```typescript jsx
+// useSingleModelB.tsx
+
+import React from 'react';
+import { useSingleModel } from '@olajs/modx';
+import modelB, { StateType } from './modelB';
+
+type Dispatchers = {
+  plusAsync(args: { timeout: number });
+  minusAsync(args: { timeout: number });
+};
+
+function useSingleModelB() {
+  const { state, dispatchers } = useSingleModel<StateType, Dispatchers>(modelB);
+
+  return (
+    <div>
+      {state.counter}
+      <br />
+      <button onClick={() => dispatchers.plusAsync({ timeout: 3000 })}>plus</button>
+      <br />
+      <button onClick={() => dispatchers.minusAsync({ timeout: 3000 })}>minus</button>
+    </div>
+  );
+}
+
+export default useSingleModelB;
+```
+
+## License
+
+[MIT](https://tldrlegal.com/license/mit-license)
