@@ -266,6 +266,10 @@ function useSingleModelB() {
 export default useSingleModelB;
 ```
 
+## Thanks
+
+Thanks [dva](https://github.com/dvajs/dva) for the `model` idea.
+
 ## License
 
 [MIT](https://tldrlegal.com/license/mit-license)
