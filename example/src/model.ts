@@ -30,24 +30,35 @@ export default {
     minus: (state: StateType) => ({ counter: state.counter - 1 }),
   },
   effects: {
-    plusAsync({ namespace, next, action, store }: EffectArgs<{ timeout: number }>) {
-      const { counting } = store.getState()[namespace] as StateType;
+    plusAsync({
+      namespace,
+      action,
+      prevState,
+      dispatcher,
+    }: EffectArgs<{ timeout: number }, StateType>) {
+      const { counting } = prevState;
+
       if (counting) return;
 
-      next({ type: `${namespace}/setCounting`, payload: true });
+      dispatcher(`${namespace}/setCounting`, true);
       setTimeout(() => {
-        next({ type: `${namespace}/plus` });
-        next({ type: `${namespace}/setCounting`, payload: false });
+        dispatcher(`${namespace}/plus`);
+        dispatcher(`${namespace}/setCounting`, false);
       }, action.payload.timeout);
     },
-    minusAsync({ namespace, next, action, store }: EffectArgs<{ timeout: number }>) {
-      const { counting } = store.getState()[namespace] as StateType;
+    minusAsync({
+      namespace,
+      action,
+      prevState,
+      dispatcher,
+    }: EffectArgs<{ timeout: number }, StateType>) {
+      const { counting } = prevState;
       if (counting) return;
 
-      next({ type: `${namespace}/setCounting`, payload: true });
+      dispatcher(`${namespace}/setCounting`, true);
       setTimeout(() => {
-        next({ type: `${namespace}/minus` });
-        next({ type: `${namespace}/setCounting`, payload: false });
+        dispatcher(`${namespace}/minus`);
+        dispatcher(`${namespace}/setCounting`, false);
       }, action.payload.timeout);
     },
   },

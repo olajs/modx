@@ -12,6 +12,8 @@ function createStore(
   modelConfigs: ModelConfig[],
   extra?: { devTools?: boolean },
 ): Store {
+  // 是否要关联 redux 的 devTool
+  // 一般在全局使用时开启，作为组件状态管理时不开启
   const { devTools } = extra || {};
   const reducers = {};
   const middlewares = [];

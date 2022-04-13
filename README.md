@@ -223,14 +223,26 @@ export default {
     minus: (state: StateType) => ({ counter: state.counter - 1 }),
   },
   effects: {
-    plusAsync({ namespace, next, action }: EffectArgs<{ timeout: number }>) {
+    plusAsync({
+      namespace,
+      dispatcher,
+      action,
+      prevState,
+    }: EffectArgs<{ timeout: number }, StateType>) {
+      console.log(prevState); // { counter: xxx }
       setTimeout(() => {
-        next({ type: `${namespace}/plus` });
+        dispatcher(`${namespace}/plus`);
       }, action.payload.timeout);
     },
-    minusAsync({ namespace, next, action }: EffectArgs<{ timeout: number }>) {
+    minusAsync({
+      namespace,
+      dispatcher,
+      action,
+      prevState,
+    }: EffectArgs<{ timeout: number }, StateType>) {
+      console.log(prevState); // { counter: xxx }
       setTimeout(() => {
-        next({ type: `${namespace}/minus` });
+        dispatcher(`${namespace}/minus`);
       }, action.payload.timeout);
     },
   },

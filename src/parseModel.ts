@@ -40,7 +40,18 @@ function createMiddleware(
   return (store) => (next) => (action) => {
     next(action);
     if (converted.hasOwnProperty(action.type)) {
-      converted[action.type]({ namespace, store, next, action });
+      converted[action.type]({
+        namespace,
+        store,
+        next,
+        action,
+        // 将当前 model 的 state 直接获取了传参，方便开发人员获取
+        prevState: store.getState()[namespace],
+        // 简化 store.dispatch() 方法的调用
+        dispatcher(actionType: string, payload?: any) {
+          store.dispatch({ type: actionType, payload });
+        },
+      });
     }
   };
 }
