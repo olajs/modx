@@ -3,6 +3,7 @@ import { useSingleModel } from '@olajs/modx';
 import model, { Dispatchers, StateType } from '../model';
 
 function Counter() {
+  console.log('counter rendered');
   const { state, dispatchers } = useSingleModel<StateType, Dispatchers>(model);
   return (
     <div>
@@ -13,4 +14,4 @@ function Counter() {
   );
 }
 
-export default Counter;
+export default React.memo(Counter);

@@ -1,12 +1,5 @@
-import {
-  createStore,
-  compose,
-  applyMiddleware,
-  combineReducers,
-  Middleware,
-  Reducer,
-  Store,
-} from 'redux';
+import { createStore, compose, applyMiddleware, combineReducers, Middleware, Reducer } from 'redux';
+import { Store } from './types';
 
 /**
  * 开发环境的 store

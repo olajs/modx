@@ -1,4 +1,8 @@
-import { Store, Dispatch, AnyAction, Reducer } from 'redux';
+import { Store as ReduxStore, Dispatch, AnyAction, Reducer } from 'redux';
+
+type Store = ReduxStore & {
+  dispatcherKeys?: { [key: string]: string[] };
+};
 
 type ModelAction<T = any> = AnyAction & {
   payload?: T;
@@ -28,4 +32,4 @@ type ModelConfig = {
   };
 };
 
-export { ModelConfig, EffectArgs, EffectFunction, ModelAction };
+export { Store, Dispatch, ModelConfig, EffectArgs, EffectFunction, ModelAction };
