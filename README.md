@@ -30,9 +30,14 @@ $ yarn add @olajs/modx
 import { ModelConfig } from '@olajs/modx';
 
 type StateType = { counter: number };
+type Dispatchers = {
+  plus();
+  minus();
+};
+
 const namespace = 'modelA';
 
-export { namespace, StateType };
+export { namespace, StateType, Dispatchers };
 export default {
   namespace,
   state: {
@@ -77,40 +82,23 @@ console.log(store.getState()[namespace]);
 // App.tsx
 
 import React from 'react';
-import { connect } from 'react-redux';
-import { namespace, StateType } from './modelA';
+import { useGlobalModel } from '@olajs/modx';
+import { namespace, StateType, Dispatchers } from './modelA';
 
-type Props = {
-  state: StateType;
-  plus();
-  minus();
-};
-
-function App(props: Props) {
+function App() {
+  const { state, dispatchers } = useGlobalModel<StateType, Dispatchers>(namespace);
   return (
     <div>
-      {props.state.counter}
+      {state.counter}
       <br />
-      <button onClick={props.plus}>plus</button>
+      <button onClick={dispatchers.plus}>plus</button>
       <br />
-      <button onClick={props.minus}>minus</button>
+      <button onClick={dispatchers.minus}>minus</button>
     </div>
   );
 }
 
-const mapStateToProps = (state) => ({
-  state: { ...state[namespace] },
-});
-const mapDispatchToProps = (dispatch) => ({
-  plus() {
-    dispatch({ type: `${namespace}/plus` });
-  },
-  minus() {
-    dispatch({ type: `${namespace}/minus` });
-  },
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(App);
+export default App;
 ```
 
 ```typescript jsx
@@ -140,12 +128,7 @@ ReactDom.render(
 
 import React from 'react';
 import { withSingleModel } from '@olajs/modx';
-import modelA, { StateType } from './modelA';
-
-type Dispatchers = {
-  plus();
-  minus();
-};
+import modelA, { StateType, Dispatchers } from './modelA';
 
 type Props = {
   state: StateType;
@@ -178,12 +161,7 @@ export default withSingleModel<StateType, Dispatchers>(modelA)(WithSingleModel);
 
 import React from 'react';
 import { useSingleModel } from '@olajs/modx';
-import modelA, { StateType } from './modelA';
-
-type Dispatchers = {
-  plus();
-  minus();
-};
+import modelA, { StateType, Dispatchers } from './modelA';
 
 function UseSingleModel() {
   const { state, dispatchers } = useSingleModel<StateType, Dispatchers>(modelA);
@@ -210,6 +188,13 @@ export default UseSingleModel;
 import { ModelConfig, EffectArgs } from '@olajs/modx';
 
 type StateType = { counter: number };
+type Dispatchers = {
+  plus();
+  minus();
+  plusAsync(args: { timeout: number });
+  minusAsync(args: { timeout: number });
+};
+
 const namespace = 'modelB';
 
 export { namespace, StateType };
@@ -254,12 +239,7 @@ export default {
 
 import React from 'react';
 import { useSingleModel } from '@olajs/modx';
-import modelB, { StateType } from './modelB';
-
-type Dispatchers = {
-  plusAsync(args: { timeout: number });
-  minusAsync(args: { timeout: number });
-};
+import modelB, { StateType, Dispatchers } from './modelB';
 
 function useSingleModelB() {
   const { state, dispatchers } = useSingleModel<StateType, Dispatchers>(modelB);
