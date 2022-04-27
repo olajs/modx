@@ -1,5 +1,9 @@
 # changelog
 
+## v1.0.4
+
+- fix: fix types
+
 ## v1.0.3
 
 - feat: 新增 `useGlobalModel` 和 `withGlobalModel` 方便使用全局状态

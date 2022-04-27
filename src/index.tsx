@@ -101,7 +101,7 @@ type UseGlobalModelResult<StateType, Dispatchers> = {
  * @param namespace
  */
 function useGlobalModel<StateType, Dispatchers>(
-  namespace,
+  namespace: string,
 ): UseGlobalModelResult<StateType, Dispatchers> {
   const store = useStore();
   const [state, setState] = useState(store.getState()[namespace]);
