@@ -52,16 +52,29 @@ function createSingleStore(modelConfig: ModelConfig): Store {
 }
 
 /**
+ * 用于在 Typescript 中获取 model 的类型声明
+ * @param modelConfig
+ * @returns
+ */
+function createModel<T extends ModelConfig>(modelConfig: T): T {
+  return modelConfig as any;
+}
+
+type Dispatchers<T extends ModelConfig> = {
+  [P in keyof T['reducers'] | keyof T['effects']]: (payload: any) => void;
+};
+
+/**
  * 获取指定 namespace 的 model 的 dispatchers 方法
  * @param store
  * @param namespace
  * @returns {{}}
  */
-function getDispatchers<Dispatchers = any>(store: Store, namespace: string): Dispatchers {
+function getDispatchers<T extends ModelConfig>(store: Store, namespace: string): Dispatchers<T> {
   const dispatcherKeys = store.dispatcherKeys[namespace] || [];
-  const result = {} as Dispatchers;
+  const result = {} as Dispatchers<T>;
 
-  dispatcherKeys.forEach((key) => {
+  dispatcherKeys.forEach((key: keyof T['reducers'] | keyof T['effects']) => {
     result[key] = function (payload) {
       store.dispatch({
         type: `${namespace}/${key}`,
@@ -77,35 +90,33 @@ function getDispatchers<Dispatchers = any>(store: Store, namespace: string): Dis
  * 包装一个拥有指定 namespace 的全局状态的组件
  * @param namespace
  */
-function withGlobalModel<StateType, Dispatchers>(namespace: string) {
+function withGlobalModel<T extends ModelConfig>(namespace: string) {
   return (
     SubComponent: React.ComponentType<{
-      globalModel: UseGlobalModelResult<StateType, Dispatchers>;
+      globalModel: UseGlobalModelResult<T>;
       [key: string]: any;
     }>,
   ) =>
     React.memo(function withGlobalModelContainer(props: unknown) {
-      const globalModel = useGlobalModel<StateType, Dispatchers>(namespace);
+      const globalModel = useGlobalModel<T>(namespace);
       return <SubComponent {...props} globalModel={globalModel} />;
     });
 }
 
-type UseGlobalModelResult<StateType, Dispatchers> = {
+type UseGlobalModelResult<T extends ModelConfig> = {
   store: Store;
-  state: StateType;
-  dispatchers: Dispatchers;
+  state: T['state'];
+  dispatchers: Dispatchers<T>;
 };
 
 /**
  * 获取指定 namespace 的全局状态的 hooks
  * @param namespace
  */
-function useGlobalModel<StateType, Dispatchers>(
-  namespace: string,
-): UseGlobalModelResult<StateType, Dispatchers> {
+function useGlobalModel<T extends ModelConfig>(namespace: string): UseGlobalModelResult<T> {
   const store = useStore();
   const [state, setState] = useState(store.getState()[namespace]);
-  const [dispatchers] = useState(() => getDispatchers(store, namespace));
+  const [dispatchers] = useState(() => getDispatchers<T>(store, namespace));
   useEffect(() => {
     return store.subscribe(() => setState(store.getState()[namespace]));
   }, []);
@@ -116,39 +127,37 @@ function useGlobalModel<StateType, Dispatchers>(
 /**
  * 为 Class Component 包装一个 singleStore
  */
-function withSingleModel<StateType, Dispatchers>(
-  modelConfig: ModelConfig,
+function withSingleModel<T extends ModelConfig>(
+  modelConfig: T,
 ): (
   SubComponent: React.ComponentType<{
-    singleModel: UseSingleModelResult<StateType, Dispatchers>;
+    singleModel: UseSingleModelResult<T>;
     [key: string]: any;
   }>,
 ) => React.FC<any> {
   return (SubComponent) => {
     return React.memo(function WithSingleModelContainer(props: unknown) {
-      const singleModel = useSingleModel<StateType, Dispatchers>(modelConfig);
+      const singleModel = useSingleModel<T>(modelConfig);
       return <SubComponent {...props} singleModel={singleModel} />;
     });
   };
 }
 
-type UseSingleModelResult<StateType, Dispatchers> = {
+type UseSingleModelResult<T extends ModelConfig> = {
   store: Store;
-  state: StateType;
-  dispatchers: Dispatchers;
+  state: T['state'];
+  dispatchers: Dispatchers<T>;
 };
 
 /**
  * modelConfig 转 React hooks
  * @param modelConfig
  */
-function useSingleModel<StateType, Dispatchers>(
-  modelConfig: ModelConfig,
-): UseSingleModelResult<StateType, Dispatchers> {
+function useSingleModel<T extends ModelConfig>(modelConfig: T): UseSingleModelResult<T> {
   const [store] = useState(createSingleStore(modelConfig));
   const [state, setState] = useState(store.getState()[modelConfig.namespace]);
   const [dispatchers] = useState(() => {
-    return getDispatchers(store, modelConfig.namespace);
+    return getDispatchers<T>(store, modelConfig.namespace);
   });
 
   useEffect(() => {
@@ -165,6 +174,7 @@ export {
   createStore,
   createSingleStore,
   getDispatchers,
+  createModel,
   withGlobalModel,
   UseGlobalModelResult,
   useGlobalModel,

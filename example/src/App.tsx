@@ -1,10 +1,10 @@
 import React from 'react';
 import { useGlobalModel } from '@olajs/modx';
-import { namespace, Dispatchers, StateType } from './model';
+import { namespace, ModelType } from './model';
 import Counter from './Counter';
 
 function App() {
-  const { state, dispatchers } = useGlobalModel<StateType, Dispatchers>(namespace);
+  const { state, dispatchers } = useGlobalModel<ModelType>(namespace);
   console.log('app rendered');
   return (
     <div>

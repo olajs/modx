@@ -1,21 +1,15 @@
-import { ModelConfig, EffectArgs, ModelAction } from '@olajs/modx';
-
-const namespace = 'modelA';
-
-type Dispatchers = {
-  plus();
-  minus();
-  plusAsync(args: { timeout: number });
-  minusAsync(args: { timeout: number });
-};
+import { EffectArgs, ModelAction, createModel } from '@olajs/modx';
 
 type StateType = {
   counter: number;
   counting: boolean;
 };
 
-export { namespace, Dispatchers, StateType };
-export default {
+type ModelType = typeof model;
+
+const namespace = 'modelA';
+
+const model = createModel({
   namespace,
   state: {
     counter: 0,
@@ -26,8 +20,8 @@ export default {
       ...state,
       counting: action.payload,
     }),
-    plus: (state: StateType) => ({ counter: state.counter + 1 }),
-    minus: (state: StateType) => ({ counter: state.counter - 1 }),
+    plus: (state: StateType) => ({ ...state, counter: state.counter + 1 }),
+    minus: (state: StateType) => ({ ...state, counter: state.counter - 1 }),
   },
   effects: {
     plusAsync({
@@ -62,4 +56,7 @@ export default {
       }, action.payload.timeout);
     },
   },
-} as ModelConfig;
+});
+
+export { namespace, StateType, ModelType };
+export default model;
