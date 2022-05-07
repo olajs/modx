@@ -1,27 +1,22 @@
-import { Store as ReduxStore, Dispatch, AnyAction, Reducer } from 'redux';
+import { Store, Dispatch, AnyAction, Reducer } from 'redux';
 
-type Store = ReduxStore & {
-  dispatcherKeys?: { [key: string]: string[] };
-};
-
-type ModelAction<T = any> = AnyAction & {
+export type ModelAction<T = any> = AnyAction & {
   payload?: T;
 };
 
-type EffectArgs<PayloadType = any, StateType = any> = {
+export type EffectArgs<Payload = any, State = any> = {
   namespace: string;
   store: Store;
   next: Dispatch;
-  action: ModelAction<PayloadType>;
   // 将当前 model 的 state 直接获取了传参，方便开发人员获取
-  prevState: StateType;
+  prevState: State;
   // 简化 store.dispatch() 方法的调用
-  dispatcher(actionType: string, payload?: any);
+  dispatcher(actionType: string, payload?: Payload);
 };
 
-type EffectFunction = (args: EffectArgs) => void;
+export type EffectFunction = (args: EffectArgs) => void;
 
-type ModelConfig = {
+export type ModelConfig = {
   namespace: string;
   state: any;
   reducers?: {
@@ -32,4 +27,10 @@ type ModelConfig = {
   };
 };
 
-export { Store, Dispatch, ModelConfig, EffectArgs, EffectFunction, ModelAction };
+export type GetDispatchers<T extends ModelConfig> = {
+  [P in keyof T['reducers']]: (state?: Partial<T['state']>) => T['state'];
+} & {
+  [P in keyof T['effects']]: T['effects'][P];
+};
+
+export { Store, Reducer, Dispatch };

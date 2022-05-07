@@ -6,7 +6,8 @@
   "types": "lib/index.d.ts",
   "scripts": {
     "build": "node ./scripts/build.js",
-    "prepublish": "npm run build"
+    "prepublish": "npm run build",
+    "example": "npm run build && cp -r lib/ example/node_modules/@olajs/modx/lib"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,css,less,scss,sass,md,json,html}": "prettier --write"
