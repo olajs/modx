@@ -1,24 +1,20 @@
-import { createModel, ModelAction } from '@olajs/modx';
+import { createModel } from '..';
 
-export type State = {
-  counter: number;
-  counting: boolean;
-};
-export const namespace = 'modelA';
+const namespace = 'modelA';
 
 const model = createModel({
   namespace,
   state: {
     counter: 0,
     counting: false,
-  } as State,
+  },
   reducers: {
-    setCounting: (state: State, action: ModelAction<State>) => ({
+    setCounting: (state, action) => ({
       ...state,
       counting: action.payload.counting,
     }),
-    plus: (state: State) => ({ ...state, counter: state.counter + 1 }),
-    minus: (state: State) => ({ ...state, counter: state.counter - 1 }),
+    plus: (state) => ({ ...state, counter: state.counter + 1 }),
+    minus: (state) => ({ ...state, counter: state.counter - 1 }),
   },
   effects: {
     plusAsync({ timeout }: { timeout: number }) {
@@ -44,4 +40,5 @@ const model = createModel({
   },
 });
 
+export { namespace };
 export default model;

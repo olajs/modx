@@ -7,7 +7,7 @@ import {
   useSingleModel,
   withSingleModel,
 } from './components';
-import { Store, ModelConfig, ModelAction, EffectArgs, EffectFunction } from './types';
+import { Store, ModelConfig, ModelAction, CreateModelOptions } from './types';
 
 /**
  * 创建一个 redux store 实例
@@ -52,15 +52,15 @@ function createSingleStore(modelConfig: ModelConfig): Store {
  * @param modelConfig
  * @returns
  */
-function createModel<T extends ModelConfig>(modelConfig: T): T {
+function createModel<Namespace, State, Reducers, Effects>(
+  modelConfig: CreateModelOptions<Namespace, State, Reducers, Effects>,
+): { namespace: Namespace; state: State; reducers?: Reducers; effects?: Effects } {
   return modelConfig as any;
 }
 
 export {
   ModelConfig,
   ModelAction,
-  EffectArgs,
-  EffectFunction,
   createStore,
   createSingleStore,
   createModel,

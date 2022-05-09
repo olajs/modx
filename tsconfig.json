@@ -20,7 +20,8 @@
     "skipLibCheck": true,
     "experimentalDecorators": true,
     "noImplicitAny": false,
-    "declaration": true
+    "declaration": true,
+    "noImplicitThis": true
   },
   "include": ["./src"],
   "exclude": []
