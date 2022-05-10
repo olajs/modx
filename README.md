@@ -27,27 +27,17 @@ $ yarn add @olajs/modx
 ```typescript
 // modelA.ts
 
-import { ModelConfig } from '@olajs/modx';
-
-type StateType = { counter: number };
-type Dispatchers = {
-  plus();
-  minus();
-};
-
-const namespace = 'modelA';
-
-export { namespace, StateType, Dispatchers };
-export default {
-  namespace,
+import { createModel } from '@olajs/modx';
+export default createModel({
+  namespace: 'modelA',
   state: {
     counter: 0,
-  } as StateType,
-  reducers: {
-    plus: (state: StateType) => ({ counter: state.counter + 1 }),
-    minus: (state: StateType) => ({ counter: state.counter - 1 }),
   },
-} as ModelConfig;
+  reducers: {
+    plus: (state) => ({ counter: state.counter + 1 }),
+    minus: (state) => ({ counter: state.counter - 1 }),
+  },
+});
 ```
 
 ### Simple use
@@ -56,9 +46,10 @@ export default {
 // store.ts
 
 import { createStore } from '@olajs/modx';
-import modelA, { namespace } from './modelA';
+import modelA from './modelA';
 
 const store = createStore({}, [modelA]);
+const { namespace } = modelA;
 
 console.log(store.getState()[namespace]);
 // { counter: 0 }
@@ -83,17 +74,17 @@ console.log(store.getState()[namespace]);
 
 import React from 'react';
 import { useGlobalModel } from '@olajs/modx';
-import { namespace, StateType, Dispatchers } from './modelA';
+import modelA from './modelA';
 
 function App() {
-  const { state, dispatchers } = useGlobalModel<StateType, Dispatchers>(namespace);
+  const { state, dispatchers } = useGlobalModel(modelA);
   return (
     <div>
       {state.counter}
       <br />
-      <button onClick={dispatchers.plus}>plus</button>
+      <button onClick={() => dispatchers.plus()}>plus</button>
       <br />
-      <button onClick={dispatchers.minus}>minus</button>
+      <button onClick={() => dispatchers.minus()}>minus</button>
     </div>
   );
 }
@@ -127,13 +118,10 @@ ReactDom.render(
 // withSingleModel.tsx
 
 import React from 'react';
-import { withSingleModel } from '@olajs/modx';
-import modelA, { StateType, Dispatchers } from './modelA';
+import { withSingleModel, UseModelResult } from '@olajs/modx';
+import modelA from './modelA';
 
-type Props = {
-  state: StateType;
-  dispatchers: Dispatchers;
-};
+type Props = UseModelResult<typeof modelA>;
 
 class WithSingleModel extends React.PureComponent<Props, any> {
   render() {
@@ -151,7 +139,7 @@ class WithSingleModel extends React.PureComponent<Props, any> {
   }
 }
 
-export default withSingleModel<StateType, Dispatchers>(modelA)(WithSingleModel);
+export default withSingleModel(modelA)(WithSingleModel);
 ```
 
 ### Using in Function Component
@@ -161,18 +149,18 @@ export default withSingleModel<StateType, Dispatchers>(modelA)(WithSingleModel);
 
 import React from 'react';
 import { useSingleModel } from '@olajs/modx';
-import modelA, { StateType, Dispatchers } from './modelA';
+import modelA from './modelA';
 
 function UseSingleModel() {
-  const { state, dispatchers } = useSingleModel<StateType, Dispatchers>(modelA);
+  const { state, dispatchers } = useSingleModel(modelA);
 
   return (
     <div>
       {state.counter}
       <br />
-      <button onClick={dispatchers.plus}>plus</button>
+      <button onClick={() => dispatchers.plus()}>plus</button>
       <br />
-      <button onClick={dispatchers.minus}>minus</button>
+      <button onClick={() => dispatchers.minus()}>minus</button>
     </div>
   );
 }
@@ -185,53 +173,34 @@ export default UseSingleModel;
 ```typescript jsx
 // modelB.ts
 
-import { ModelConfig, EffectArgs } from '@olajs/modx';
+import { createModel } from '@olajs/modx';
 
-type StateType = { counter: number };
-type Dispatchers = {
-  plus();
-  minus();
-  plusAsync(args: { timeout: number });
-  minusAsync(args: { timeout: number });
-};
-
-const namespace = 'modelB';
-
-export { namespace, StateType };
-export default {
-  namespace,
+export default createModel({
+  namespace: 'modelB',
   state: {
     counter: 0,
-  } as StateType,
+  },
   reducers: {
-    plus: (state: StateType) => ({ counter: state.counter + 1 }),
-    minus: (state: StateType) => ({ counter: state.counter - 1 }),
+    plus: (state) => ({ counter: state.counter + 1 }),
+    minus: (state) => ({ counter: state.counter - 1 }),
   },
   effects: {
-    plusAsync({
-      namespace,
-      dispatcher,
-      action,
-      prevState,
-    }: EffectArgs<{ timeout: number }, StateType>) {
+    plusAsync({ timeout }: { timeout: number }) {
+      const { prevState } = this;
       console.log(prevState); // { counter: xxx }
       setTimeout(() => {
-        dispatcher(`${namespace}/plus`);
-      }, action.payload.timeout);
+        this.plus();
+      }, timeout);
     },
-    minusAsync({
-      namespace,
-      dispatcher,
-      action,
-      prevState,
-    }: EffectArgs<{ timeout: number }, StateType>) {
+    minusAsync({ timeout }: { timeout: number }) {
+      const { prevState } = this;
       console.log(prevState); // { counter: xxx }
       setTimeout(() => {
-        dispatcher(`${namespace}/minus`);
-      }, action.payload.timeout);
+        this.minus();
+      }, timeout);
     },
   },
-} as ModelConfig;
+});
 ```
 
 ```typescript jsx
@@ -239,10 +208,10 @@ export default {
 
 import React from 'react';
 import { useSingleModel } from '@olajs/modx';
-import modelB, { StateType, Dispatchers } from './modelB';
+import modelB from './modelB';
 
 function useSingleModelB() {
-  const { state, dispatchers } = useSingleModel<StateType, Dispatchers>(modelB);
+  const { state, dispatchers } = useSingleModel(modelB);
 
   return (
     <div>
@@ -260,7 +229,8 @@ export default useSingleModelB;
 
 ## Thanks
 
-Thanks [dva](https://github.com/dvajs/dva) for the `model` idea.
+- Thanks [dva](https://github.com/dvajs/dva) for the `model` idea.
+- Thanks [foca](https://github.com/foca-js/foca) for the typescript's types optimization idea.
 
 ## License
 

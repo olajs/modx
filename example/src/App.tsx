@@ -1,7 +1,7 @@
 import React from 'react';
 import { useGlobalModel } from '@olajs/modx';
 import model from './model';
-import Counter from './Counter';
+import Counter, { CounterClass } from './Counter';
 
 function App() {
   const { state, dispatchers } = useGlobalModel(model);
@@ -13,6 +13,8 @@ function App() {
       <button onClick={() => dispatchers.minus()}>-</button>
       <p>Async</p>
       <Counter />
+      <p>Class Component</p>
+      <CounterClass />
     </div>
   );
 }

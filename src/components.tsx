@@ -62,15 +62,13 @@ export function useSingleModel<T extends ModelConfig>(modelConfig: T): UseModelR
 /**
  * 为 Class Component 包装一个 singleStore
  */
-export function withSingleModel<T extends ModelConfig>(
-  modelConfig: T,
-): (
-  SubComponent: React.ComponentType<{
-    singleModel: UseModelResult<T>;
-    [key: string]: any;
-  }>,
-) => React.FC<any> {
-  return (SubComponent) => {
+export function withSingleModel<T extends ModelConfig>(modelConfig: T) {
+  return (
+    SubComponent: React.ComponentType<{
+      singleModel: UseModelResult<T>;
+      [key: string]: any;
+    }>,
+  ) => {
     return React.memo(function WithSingleModelContainer(props: unknown) {
       const singleModel = useSingleModel<T>(modelConfig);
       return <SubComponent {...props} singleModel={singleModel} />;

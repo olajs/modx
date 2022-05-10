@@ -1,5 +1,5 @@
 import React from 'react';
-import { useSingleModel } from '@olajs/modx';
+import { useSingleModel, UseModelResult, withSingleModel } from '@olajs/modx';
 import model from '../model';
 
 function Counter() {
@@ -13,5 +13,24 @@ function Counter() {
     </div>
   );
 }
+
+type Props = { singleModel: UseModelResult<typeof model> };
+
+const CounterClass = withSingleModel(model)(
+  class extends React.PureComponent<Props, any> {
+    render() {
+      const { state, dispatchers } = this.props.singleModel;
+      return (
+        <div>
+          <p>{state.counter}</p>
+          <button onClick={() => dispatchers.plus()}>+</button>
+          <button onClick={() => dispatchers.minus()}>-</button>
+        </div>
+      );
+    }
+  },
+);
+
+export { CounterClass };
 
 export default React.memo(Counter);
