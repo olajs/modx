@@ -1,7 +1,7 @@
 import { Store, Dispatch, AnyAction, Reducer } from 'redux';
 
 export type ModelAction<T = any> = AnyAction & {
-  payload?: T;
+  payload?: Partial<T>;
 };
 
 export type ModelConfig = {
@@ -19,8 +19,9 @@ export type CreateModelOptions<Namespace, State, Reducers, Effects> = {
   namespace: Namespace;
   state: State;
   reducers?: Reducers & {
-    [p in keyof Reducers]: Reducer<State>;
+    [p in keyof Reducers]: Reducer<State, ModelAction<State>>;
   };
+  // 注意：ThisType 依赖 TS 配置项：noImplicitThis: true，否则在 effects 中没有 this 的自动提示
   effects?: Effects &
     ThisType<
       {
