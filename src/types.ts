@@ -38,10 +38,9 @@ export type CreateModelOptions<Namespace, State, Reducers, Effects> = {
     >;
 };
 
-export type GetDispatchers<T extends ModelConfig> = {
-  [P in keyof T['reducers']]: (payload?: Partial<T['state']>) => void;
-} & {
-  [P in keyof T['effects']]: T['effects'][P];
-};
+export type GetDispatchers<T extends ModelConfig> = T['reducers'] &
+  T['effects'] & {
+    [P in keyof T['reducers']]: (payload?: Partial<T['state']>) => void;
+  };
 
 export { Store, Reducer, Dispatch };

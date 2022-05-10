@@ -1,4 +1,4 @@
-import { Store, ModelConfig, ModelAction, CreateModelOptions, Reducer, Dispatch } from './types';
+import { Store, ModelConfig, ModelAction, Reducer, Dispatch, CreateModelOptions } from './types';
 import parseModel from './parseModel';
 import configureStore from './configureStore';
 
