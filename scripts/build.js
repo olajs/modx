@@ -21,3 +21,5 @@ if (result.status !== 0 || result.error) {
 }
 
 spawnSync('tsc', ['--emitDeclarationOnly'], { cwd, stdio: 'inherit' });
+
+rimraf.sync(path.resolve(__dirname, '../lib/demo'));
