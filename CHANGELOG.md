@@ -4,7 +4,7 @@
 
 - feat: 增强类型推断，减少不必要的手动类型声明
 
-### Breaking changes
+### Breaking Changes
 
 - `model` 配置需要通过 `createModel` 方法包裹
   ```javascript
