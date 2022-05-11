@@ -77,7 +77,7 @@ export function withSingleModel<T extends ModelConfig>(modelConfig: T) {
 }
 
 /**
- * 获取指定 namespace 的 model 的 dispatchers 方法
+ * 获取指定 model 的 dispatchers 方法
  * @param store
  * @param modelConfig
  * @returns {{}}
@@ -88,12 +88,7 @@ function getDispatchers<T extends ModelConfig>(store: Store, modelConfig: T): Ge
 
   [...Object.keys(modelConfig.reducers || {}), ...Object.keys(modelConfig.effects || {})].forEach(
     (key: string) => {
-      result[key] = function (payload: any) {
-        store.dispatch({
-          type: `${namespace}/${key}`,
-          payload,
-        });
-      };
+      result[key] = (payload: any) => store.dispatch({ type: `${namespace}/${key}`, payload });
     },
   );
 

@@ -89,6 +89,9 @@ export function createSingleStore(modelConfig: ModelConfig): Store {
 //   return modelConfig as any;
 // }
 
+/**
+ * 包裹 model 声明配置，主要是为了类型推断
+ **/
 export function createModel<Namespace, State, Reducers, Effects>(
   modelConfig: CreateModelOptions<Namespace, State, Reducers, Effects>,
 ): { namespace: Namespace; state: State; reducers?: Reducers; effects?: Effects } {

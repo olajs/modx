@@ -1,17 +1,19 @@
 import { ModelConfig } from './types';
 import { Middleware, Reducer } from 'redux';
 
+// 要注入的 effects 的 this 属性
+const EFFECT_THIS_KEYS = ['namespace', 'store', 'next', 'prevState', 'dispatcher'];
+
 /**
  * 创建一个 reducer，将其 action 与 subject 相关联
  */
-function createReducer(
-  namespace: string,
-  reducers: { [reducerName: string]: Reducer },
-  initialState: any,
-): Reducer {
+function createReducer({ namespace, reducers = {}, state: initialState }): Reducer {
   const converted = {};
 
   Object.keys(reducers).forEach((actionType: string) => {
+    if (EFFECT_THIS_KEYS.includes(actionType)) {
+      throw new Error(`[modx: ${namespace}] reducers can not have method named "${actionType}"`);
+    }
     converted[`${namespace}/${actionType}`] = reducers[actionType];
   });
 
@@ -27,10 +29,13 @@ function createReducer(
 /**
  * 将 effects 解析成 redux middleware
  */
-function createMiddleware({ namespace, reducers = {}, effects }: ModelConfig): Middleware {
+function createMiddleware({ namespace, reducers = {}, effects = {} }: ModelConfig): Middleware {
   const converted = {};
 
   Object.keys(effects).forEach((actionType) => {
+    if (EFFECT_THIS_KEYS.includes(actionType)) {
+      throw new Error(`[modx: ${namespace}] effects can not have method named "${actionType}"`);
+    }
     converted[`${namespace}/${actionType}`] = effects[actionType];
   });
 
@@ -73,17 +78,14 @@ export default function parseModel(modelConfig: ModelConfig): {
   reducer: Reducer;
   middleware: Middleware;
 } {
-  const { namespace, state, reducers, effects } = modelConfig;
-
-  let parsedReducer: Reducer;
-  if (reducers) {
-    parsedReducer = createReducer(namespace, reducers, state);
-  }
-
-  let middleware: Middleware;
-  if (effects) {
-    middleware = createMiddleware(modelConfig);
-  }
-
-  return { reducer: parsedReducer, middleware };
+  const { namespace, reducers = {}, effects = {} } = modelConfig;
+  Object.keys(reducers).forEach((key) => {
+    if (effects.hasOwnProperty(key)) {
+      throw new Error(`[modx: ${namespace}] method "${key}" defined in both reducers and effects`);
+    }
+  });
+  return {
+    reducer: createReducer(modelConfig),
+    middleware: createMiddleware(modelConfig),
+  };
 }

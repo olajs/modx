@@ -33,9 +33,9 @@ function configureStoreProd({
   reducers,
   middlewares = [],
 }: {
-  middlewares: Middleware[];
-  reducers: { [key: string]: Reducer };
   initialState: any;
+  reducers: { [key: string]: Reducer };
+  middlewares: Middleware[];
   devTools?: boolean;
 }): Store {
   return createStore(
