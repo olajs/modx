@@ -11,7 +11,7 @@ const model = createModel({
   reducers: {
     setCounting: (state, action) => ({
       ...state,
-      counting: action.payload.counting,
+      counting: action.payload?.counting || state.counting,
     }),
     plus: (state) => ({ ...state, counter: state.counter + 1 }),
     minus: (state) => ({ ...state, counter: state.counter - 1 }),

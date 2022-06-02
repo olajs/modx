@@ -7,25 +7,31 @@ export type ModelAction<T = any> = AnyAction & {
 export type ModelConfig = {
   namespace: string;
   state: any;
-  reducers?: {
-    [key: string]: Reducer;
-  };
-  effects?: {
-    [key: string]: (payload?: any) => void;
-  };
+  reducers?:
+    | {
+        [key: string]: Reducer;
+      }
+    | unknown;
+  effects?:
+    | {
+        [key: string]: (payload?: any) => void;
+      }
+    | unknown;
 };
 
 export type CreateModelOptions<Namespace, State, Reducers, Effects> = {
   namespace: Namespace;
   state: State;
   reducers?: Reducers & {
-    [p in keyof Reducers]: Reducer<State, ModelAction<State>>;
+    [p in keyof Reducers]: (state: State, action: ModelAction<State>) => State;
   };
   // 注意：ThisType 依赖 TS 配置项：noImplicitThis: true，否则在 effects 中没有 this 的自动提示
   effects?: Effects &
     ThisType<
       {
         [p in keyof Reducers]: (payload?: Partial<State>) => void;
+      } & {
+        [p in keyof Effects]: (arg?) => void;
       } & {
         namespace: Namespace;
         store: Store;
