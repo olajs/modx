@@ -29,15 +29,20 @@ function createReducer({ namespace, reducers = {}, state: initialState }): Reduc
 /**
  * 将 effects 解析成 redux middleware
  */
-function createMiddleware({ namespace, reducers = {}, effects = {} }: ModelConfig): Middleware {
+function createMiddleware<Namespace, State, Reducers, Effects>({
+  namespace,
+  reducers,
+  effects,
+}: ModelConfig<Namespace, State, Reducers, Effects>): Middleware {
   const converted = {};
 
-  Object.keys(effects).forEach((actionType) => {
-    if (EFFECT_THIS_KEYS.includes(actionType)) {
-      throw new Error(`[modx: ${namespace}] effects can not have method named "${actionType}"`);
-    }
-    converted[`${namespace}/${actionType}`] = effects[actionType];
-  });
+  effects &&
+    Object.keys(effects).forEach((actionType) => {
+      if (EFFECT_THIS_KEYS.includes(actionType)) {
+        throw new Error(`[modx: ${namespace}] effects can not have method named "${actionType}"`);
+      }
+      converted[`${namespace}/${actionType}`] = effects[actionType];
+    });
 
   return (store) => (next) => (action) => {
     next(action);
@@ -54,18 +59,22 @@ function createMiddleware({ namespace, reducers = {}, effects = {} }: ModelConfi
           store.dispatch({ type: actionType, payload });
         },
       };
+
       // reducers 的快捷方法
       Object.keys(reducers).forEach((key) => {
         thisType[key] = (payload: any) => {
           store.dispatch({ type: `${namespace}/${key}`, payload });
         };
       });
+
       // effects 的快捷方法
-      Object.keys(effects).forEach((key) => {
-        thisType[key] = (payload: any) => {
-          store.dispatch({ type: `${namespace}/${key}`, payload });
-        };
-      });
+      effects &&
+        Object.keys(effects).forEach((key) => {
+          thisType[key] = (payload: any) => {
+            store.dispatch({ type: `${namespace}/${key}`, payload });
+          };
+        });
+
       converted[action.type].call(thisType, action.payload);
     }
   };
@@ -74,7 +83,9 @@ function createMiddleware({ namespace, reducers = {}, effects = {} }: ModelConfi
 /**
  * 解析 model 数据
  */
-export default function parseModel(modelConfig: ModelConfig): {
+export default function parseModel<Namespace, State, Reducers, Effects>(
+  modelConfig: ModelConfig<Namespace, State, Reducers, Effects>,
+): {
   reducer: Reducer;
   middleware: Middleware;
 } {

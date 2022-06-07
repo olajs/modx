@@ -14,7 +14,9 @@ function Counter() {
   );
 }
 
-type Props = { singleModel: UseModelResult<typeof model> };
+type Props = {
+  singleModel: UseModelResult<typeof model>;
+};
 
 const CounterClass = withSingleModel(model)(
   class extends React.PureComponent<Props, any> {

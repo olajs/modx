@@ -19,6 +19,7 @@
     "allowJs": true,
     "skipLibCheck": true,
     "experimentalDecorators": true,
+    "strict": true,
     "noImplicitAny": false,
     "declaration": true,
     "noImplicitThis": true

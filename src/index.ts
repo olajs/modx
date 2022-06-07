@@ -7,15 +7,22 @@ export * from './components';
 /**
  * 创建一个 redux store 实例
  */
-export function createStore(
-  initialState: any,
-  modelConfigs: ModelConfig[],
-  extra?: { devTools?: boolean },
+export function createStore<
+  InitialState,
+  Namespace,
+  State,
+  Reducers,
+  Effects,
+  Extra extends { devTools?: boolean },
+>(
+  initialState: InitialState,
+  modelConfigs: ModelConfig<Namespace, State, Reducers, Effects>[],
+  extra?: Extra,
 ): Store {
   // 是否要关联 redux 的 devTool
   // 一般在全局使用时开启，作为组件状态管理时不开启
   const { devTools } = extra || {};
-  const reducers = {};
+  const reducers: any = {};
   const middlewares: any[] = [];
 
   modelConfigs.forEach((modelConfig) => {
@@ -38,7 +45,9 @@ export function createStore(
 /**
  * 接收单个 modelConfig 创建 redux store
  */
-export function createSingleStore(modelConfig: ModelConfig): Store {
+export function createSingleStore<Namespace, State, Reducers, Effects>(
+  modelConfig: ModelConfig<Namespace, State, Reducers, Effects>,
+): Store {
   return createStore({}, [modelConfig]);
 }
 
@@ -92,9 +101,9 @@ export function createSingleStore(modelConfig: ModelConfig): Store {
 /**
  * 包裹 model 声明配置，主要是为了类型推断
  **/
-export function createModel<Namespace, State, Reducers, Effects>(
+export function createModel<Namespace, State, Reducers, Effects, Others>(
   modelConfig: CreateModelOptions<Namespace, State, Reducers, Effects>,
-): { namespace: Namespace; state: State; reducers?: Reducers; effects?: Effects } {
+): ModelConfig<Namespace, State, Reducers, Effects> {
   return modelConfig as any;
 }
 

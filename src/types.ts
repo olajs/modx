@@ -4,25 +4,17 @@ export type ModelAction<T = any> = AnyAction & {
   payload?: Partial<T>;
 };
 
-export type ModelConfig = {
-  namespace: string;
-  state: any;
-  reducers?:
-    | {
-        [key: string]: Reducer;
-      }
-    | unknown;
-  effects?:
-    | {
-        [key: string]: (payload?: any) => void;
-      }
-    | unknown;
+export type ModelConfig<Namespace, State, Reducers, Effects> = {
+  namespace: Namespace;
+  state: State;
+  reducers: Reducers;
+  effects?: Effects;
 };
 
 export type CreateModelOptions<Namespace, State, Reducers, Effects> = {
   namespace: Namespace;
   state: State;
-  reducers?: Reducers & {
+  reducers: Reducers & {
     [p in keyof Reducers]: (state: State, action: ModelAction<State>) => State;
   };
   // 注意：ThisType 依赖 TS 配置项：noImplicitThis: true，否则在 effects 中没有 this 的自动提示
@@ -31,7 +23,7 @@ export type CreateModelOptions<Namespace, State, Reducers, Effects> = {
       {
         [p in keyof Reducers]: (payload?: Partial<State>) => void;
       } & {
-        [p in keyof Effects]: (arg?) => void;
+        [p in keyof Effects]: (arg?: any) => void;
       } & {
         namespace: Namespace;
         store: Store;
@@ -44,9 +36,8 @@ export type CreateModelOptions<Namespace, State, Reducers, Effects> = {
     >;
 };
 
-export type GetDispatchers<T extends ModelConfig> = T['reducers'] &
-  T['effects'] & {
-    [P in keyof T['reducers']]: (payload?: Partial<T['state']>) => void;
-  };
+export type GetDispatchers<State, Reducers, Effects> = Effects & {
+  [P in keyof Reducers]: (payload?: Partial<State>) => void;
+};
 
 export { Store, Reducer, Dispatch };
