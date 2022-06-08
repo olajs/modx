@@ -6,7 +6,7 @@ import model from './model';
 import App from './App';
 import './index.css';
 
-const store = createStore({}, [model]);
+const store = createStore({}, [model], { devTools: true });
 
 ReactDOM.render(
   <React.StrictMode>

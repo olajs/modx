@@ -93,11 +93,10 @@ function getDispatchers<S extends Store, Namespace, State, Reducers, Effects>(
   const { namespace } = modelConfig;
   const result = {};
 
-  if (modelConfig.reducers) {
-    Object.keys(modelConfig.reducers).forEach((key: string) => {
-      result[key] = (payload: any) => store.dispatch({ type: `${namespace}/${key}`, payload });
-    });
-  }
+  Object.keys(modelConfig.reducers).forEach((key: string) => {
+    result[key] = (payload: any) => store.dispatch({ type: `${namespace}/${key}`, payload });
+  });
+
   if (modelConfig.effects) {
     Object.keys(modelConfig.effects).forEach((key) => {
       result[key] = (payload: any) => store.dispatch({ type: `${namespace}/${key}`, payload });
