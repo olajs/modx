@@ -1,5 +1,9 @@
 # changelog
 
+## v2.0.2
+
+- chore: 优化类型推断
+
 ## v2.0.1
 
 - chore: 优化类型推断
