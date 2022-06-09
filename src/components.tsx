@@ -5,18 +5,18 @@ import { createSingleStore } from '.';
 
 export type UseModelResult<
   T extends ModelConfig<T['namespace'], T['state'], T['reducers'], T['effects']>,
-> = {
-  store: Store;
-  state: T['state'];
+> = Readonly<{
+  store: Readonly<Store>;
+  state: Readonly<T['state']>;
   dispatchers: GetDispatchers<T['state'], T['reducers'], T['effects']>;
-};
+}>;
 
 /**
  * 获取指定 modelConfig 的全局状态的 hooks
  */
 export function useGlobalModel<Namespace, State, Reducers, Effects>(
   modelConfig: ModelConfig<Namespace, State, Reducers, Effects>,
-) {
+): UseModelResult<ModelConfig<Namespace, State, Reducers, Effects>> {
   const { namespace } = modelConfig;
   const store = useStore();
   const [state, setState] = useState<State>(store.getState()[namespace]);
@@ -51,9 +51,9 @@ export function withGlobalModel<Namespace, State, Reducers, Effects>(
  */
 export function useSingleModel<Namespace, State, Reducers, Effects>(
   modelConfig: ModelConfig<Namespace, State, Reducers, Effects>,
-) {
+): UseModelResult<ModelConfig<Namespace, State, Reducers, Effects>> {
   const [store] = useState(createSingleStore(modelConfig));
-  const [state, setState] = useState(store.getState()[modelConfig.namespace]);
+  const [state, setState] = useState<State>(store.getState()[modelConfig.namespace]);
   const [dispatchers] = useState(() => {
     return getDispatchers(store, modelConfig);
   });

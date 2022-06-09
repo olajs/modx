@@ -1,5 +1,9 @@
 # changelog
 
+## v2.0.3
+
+- chore: 添加必要的 `readonly` 修饰符
+
 ## v2.0.2
 
 - chore: 优化类型推断

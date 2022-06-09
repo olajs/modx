@@ -21,6 +21,8 @@ const model = createModel({
       const { counting } = this.prevState;
       if (counting) return;
 
+      console.log(typeof this.minusAsync);
+
       this.setCounting({ counting: true });
       setTimeout(() => {
         this.plus();
