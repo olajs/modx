@@ -7,9 +7,12 @@ function Counter() {
   const { state, dispatchers } = useSingleModel(model);
   return (
     <div>
-      <p>{state.counter}</p>
-      <button onClick={() => dispatchers.plusAsync({ timeout: 1000 })}>+</button>
-      <button onClick={() => dispatchers.minusAsync({ timeout: 1000 })}>-</button>
+      <p>
+        {state.counter} counting:{state.counting}
+      </p>
+      <button onClick={() => dispatchers.setCounting(!state.counting)}>set counting</button>
+      <button onClick={() => dispatchers.plusAsync(1000)}>+</button>
+      <button onClick={() => dispatchers.minusAsync(1000)}>-</button>
     </div>
   );
 }

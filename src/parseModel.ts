@@ -19,7 +19,7 @@ function createReducer({ namespace, reducers = {}, state: initialState }): Reduc
 
   return function (state = initialState, action) {
     if (converted.hasOwnProperty(action.type)) {
-      return converted[action.type](state, action);
+      return converted[action.type](state, action.payload);
     }
 
     return state;

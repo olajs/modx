@@ -185,14 +185,14 @@ export default createModel({
     minus: (state) => ({ counter: state.counter - 1 }),
   },
   effects: {
-    plusAsync({ timeout }: { timeout: number }) {
+    plusAsync(timeout: number) {
       const { prevState } = this;
       console.log(prevState); // { counter: xxx }
       setTimeout(() => {
         this.plus();
       }, timeout);
     },
-    minusAsync({ timeout }: { timeout: number }) {
+    minusAsync(timeout: number) {
       const { prevState } = this;
       console.log(prevState); // { counter: xxx }
       setTimeout(() => {
@@ -217,9 +217,9 @@ function useSingleModelB() {
     <div>
       {state.counter}
       <br />
-      <button onClick={() => dispatchers.plusAsync({ timeout: 3000 })}>plus</button>
+      <button onClick={() => dispatchers.plusAsync(3000)}>plus</button>
       <br />
-      <button onClick={() => dispatchers.minusAsync({ timeout: 3000 })}>minus</button>
+      <button onClick={() => dispatchers.minusAsync(3000)}>minus</button>
     </div>
   );
 }

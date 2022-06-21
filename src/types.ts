@@ -11,49 +11,49 @@ export type ModelConfig<Namespace, State, Reducers, Effects> = {
   effects?: Effects;
 };
 
-type ReducerWithAction<State> = (state: State, action: ModelAction<State>) => State;
-type ReducerNoAction<State> = (state: State) => State;
+type ReducerFunction<State, FunctionValue> = FunctionValue extends (state: State) => State
+  ? () => void
+  : FunctionValue extends (state: State, payload: infer Args) => State
+  ? (payload: Args) => void
+  : never;
+
+type EffectFunction<FunctionValue> = FunctionValue extends (payload?: any) => void
+  ? FunctionValue
+  : (payload?: any) => void;
 
 export type CreateModelOptions<Namespace, State, Reducers, Effects> = {
   namespace: Namespace;
   state: State;
   reducers: Reducers & {
-    [p in keyof Reducers]: (state: State, action: ModelAction<State>) => State;
+    [key in keyof Reducers]: (state: State, payload: any) => State;
   };
   // 注意：ThisType 依赖 TS 配置项：noImplicitThis: true，否则在 effects 中没有 this 的自动提示
-  effects?: Effects &
-    ThisType<
-      Readonly<
-        {
-          [p in keyof Reducers]: Reducers[p] extends ReducerNoAction<State>
-            ? () => void
-            : Reducers[p] extends ReducerWithAction<State>
-            ? (payload: Partial<State>) => void
-            : any;
-        } & {
-          [p in keyof Effects]: Effects[p];
-        } & {
-          namespace: Namespace;
-          store: Readonly<Store>;
-          next: Dispatch;
-          // 将当前 model 的 state 直接获取了传参，方便开发人员获取
-          prevState: Readonly<State>;
-          // 简化 store.dispatch() 方法的调用
-          dispatcher(actionType: string, payload?: any): void;
-        }
-      >
-    >;
+  effects?: {
+    [key in keyof Effects]: EffectFunction<Effects[key]>;
+  } & ThisType<
+    Readonly<
+      {
+        [key in keyof Reducers]: ReducerFunction<State, Reducers[key]>;
+      } & {
+        [key in keyof Effects]: EffectFunction<Effects[key]>;
+      } & {
+        namespace: Namespace;
+        store: Readonly<Store>;
+        next: Dispatch;
+        // 将当前 model 的 state 直接获取了传参，方便开发人员获取
+        prevState: Readonly<State>;
+        // 简化 store.dispatch() 方法的调用
+        dispatcher(actionType: string, payload?: any): void;
+      }
+    >
+  >;
 };
 
 export type GetDispatchers<State, Reducers, Effects> = Readonly<
   {
-    [p in keyof Effects]: Effects[p];
+    [key in keyof Effects]: Effects[key];
   } & {
-    [P in keyof Reducers]: Reducers[P] extends ReducerNoAction<State>
-      ? () => void
-      : Reducers[P] extends ReducerWithAction<State>
-      ? (payload: Partial<State>) => void
-      : any;
+    [key in keyof Reducers]: ReducerFunction<State, Reducers[key]>;
   }
 >;
 
