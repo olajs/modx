@@ -1,5 +1,9 @@
 # changelog
 
+## v2.1.0
+
+- feat: 简化 `reducers` 参数
+
 ## v2.0.3
 
 - chore: 添加必要的 `readonly` 修饰符
