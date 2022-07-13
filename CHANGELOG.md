@@ -1,5 +1,9 @@
 # changelog
 
+## v2.1.1
+
+- feat: 支持添加额外的 `redux middleware`
+
 ## v2.1.0
 
 - feat: 简化 `reducers` 参数

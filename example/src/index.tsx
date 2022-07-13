@@ -6,7 +6,15 @@ import model from './model';
 import App from './App';
 import './index.css';
 
-const store = createStore({}, [model], { devTools: true });
+const testMiddleware = (store) => (next) => (action) => {
+  console.log('dispatched action: ', action);
+  return next(action);
+};
+
+const store = createStore({}, [model], {
+  devTools: true,
+  middlewares: [testMiddleware],
+});
 
 ReactDOM.render(
   <React.StrictMode>

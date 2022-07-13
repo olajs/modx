@@ -1,3 +1,4 @@
+import { Middleware } from 'redux';
 import { Store, ModelConfig, ModelAction, Reducer, Dispatch, CreateModelOptions } from './types';
 import parseModel from './parseModel';
 import configureStore from './configureStore';
@@ -10,13 +11,16 @@ export * from './components';
 export function createStore<
   InitialState,
   T extends ModelConfig<T['namespace'], T['state'], T['reducers'], T['effects']>,
-  Extra extends { devTools?: boolean },
+  Extra extends {
+    devTools?: boolean;
+    middlewares?: Middleware[];
+  },
 >(initialState: InitialState, modelConfigs: T[], extra?: Extra): Store {
   // 是否要关联 redux 的 devTool
   // 一般在全局使用时开启，作为组件状态管理时不开启
   const { devTools } = extra || {};
   const reducers: any = {};
-  const middlewares: any[] = [];
+  const middlewares: any[] = [...(extra?.middlewares || [])];
 
   modelConfigs.forEach((modelConfig) => {
     const { namespace } = modelConfig;
@@ -36,8 +40,9 @@ export function createStore<
  */
 export function createSingleStore<Namespace, State, Reducers, Effects>(
   modelConfig: ModelConfig<Namespace, State, Reducers, Effects>,
+  middlewares?: Middleware[],
 ): Store {
-  return createStore({}, [modelConfig]);
+  return createStore({}, [modelConfig], { middlewares });
 }
 
 /**
