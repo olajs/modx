@@ -1,14 +1,14 @@
 import React from 'react';
-import { useSingleModel, UseModelResult, withSingleModel } from '@olajs/modx';
-import model from '../model';
+import { useModel, UseModelResult, withModel } from '@olajs/modx';
+import model from './model';
 
 function Counter() {
   console.log('counter rendered');
-  const { state, dispatchers } = useSingleModel(model);
+  const { state, dispatchers } = useModel(model);
   return (
     <div>
       <p>
-        {state.counter} counting:{state.counting}
+        counter: {state.counter}, counting: {state.counting.toString()}
       </p>
       <button onClick={() => dispatchers.setCounting(!state.counting)}>set counting</button>
       <button onClick={() => dispatchers.plusAsync(1000)}>+</button>
@@ -18,16 +18,16 @@ function Counter() {
 }
 
 type Props = {
-  singleModel: UseModelResult<typeof model>;
+  model: UseModelResult<typeof model>;
 };
 
-const CounterClass = withSingleModel(model)(
+const CounterClass = withModel(model)(
   class extends React.PureComponent<Props, any> {
     render() {
-      const { state, dispatchers } = this.props.singleModel;
+      const { state, dispatchers } = this.props.model;
       return (
         <div>
-          <p>{state.counter}</p>
+          <p>counter: {state.counter}</p>
           <button onClick={() => dispatchers.plus()}>+</button>
           <button onClick={() => dispatchers.minus()}>-</button>
         </div>

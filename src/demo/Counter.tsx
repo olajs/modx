@@ -1,9 +1,9 @@
 import React from 'react';
-import { useSingleModel } from '..';
+import { useModel } from '..';
 import model from './testModel';
 
 function Counter() {
-  const { state, dispatchers } = useSingleModel(model);
+  const { state, dispatchers } = useModel(model);
   console.log('counter rendered');
   return (
     <div>

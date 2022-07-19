@@ -12,6 +12,50 @@ export type UseModelResult<
 }>;
 
 /**
+ * 获取指定 modelConfig 的状态的 hooks
+ */
+export function useModel<Namespace, State, Reducers, Effects>(
+  modelConfig: ModelConfig<Namespace, State, Reducers, Effects>,
+): UseModelResult<ModelConfig<Namespace, State, Reducers, Effects>> {
+  const { namespace } = modelConfig;
+
+  // 自动判断是全局 model 还是组件内部 model
+  const storeGlobal = useStore();
+  const [store] = useState(() => {
+    if (namespace in storeGlobal.getState()) {
+      return storeGlobal;
+    }
+    return createSingleStore(modelConfig);
+  });
+
+  const [state, setState] = useState<State>(store.getState()[namespace]);
+  const [dispatchers] = useState(() => getDispatchers(store, modelConfig));
+  useEffect(() => {
+    return store.subscribe(() => setState(store.getState()[namespace]));
+  }, []);
+
+  return { store, state, dispatchers };
+}
+
+/**
+ * 包装一个拥有指定 modelConfig 的状态的组件
+ */
+export function withModel<Namespace, State, Reducers, Effects>(
+  modelConfig: ModelConfig<Namespace, State, Reducers, Effects>,
+) {
+  return (
+    SubComponent: React.ComponentType<{
+      model: UseModelResult<ModelConfig<Namespace, State, Reducers, Effects>>;
+      [key: string]: any;
+    }>,
+  ) =>
+    React.memo(function withGlobalModelContainer(props: unknown) {
+      const model = useModel(modelConfig);
+      return <SubComponent {...props} model={model} />;
+    });
+}
+
+/**
  * 获取指定 modelConfig 的全局状态的 hooks
  */
 export function useGlobalModel<Namespace, State, Reducers, Effects>(

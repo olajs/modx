@@ -21,6 +21,7 @@ $ yarn add @olajs/modx
 - [Using in Class Component](#using-in-class-component)
 - [Using in Function Component](#using-in-function-component)
 - [Using async logic](#using-async-logic)
+- [useModel & withModel](#usemodel--withmodel)
 
 ### Create model
 
@@ -225,6 +226,41 @@ function useSingleModelB() {
 }
 
 export default useSingleModelB;
+```
+
+## useModel & withModel
+
+Simple way of `useGlobalModel/useSingleModel` or `withGlobalModel/withSingleModel` methods.
+
+When use `useModel` hooks (since modx@2.1.2), `modx` will use `model` in global state first, if not exists, `modx`
+will create a local state for it.
+
+```typescript jsx
+import React from 'react';
+import { useModel } from '@olajs/modx';
+import modelA from './modelA'; // global state
+import modelB from './modelB'; // local state
+
+function UseModelExample() {
+  const { state: stateA, dispatchers: dispatchersA } = useModel(modelA);
+  const { state: stateB, dispatchers: dispatchersB } = useModel(modelB);
+
+  return (
+    <div>
+      counterA: {stateA.counter}, counterB: {stateB.counter}
+      <br />
+      <button onClick={() => dispatchersA.plusAsync(3000)}>plusA</button>
+      <br />
+      <button onClick={() => dispatchersA.minusAsync(3000)}>minusA</button>
+      <br />
+      <button onClick={() => dispatchersB.plusAsync(3000)}>plusB</button>
+      <br />
+      <button onClick={() => dispatchersB.minusAsync(3000)}>minusB</button>
+    </div>
+  );
+}
+
+export default UseModelExample;
 ```
 
 ## Thanks

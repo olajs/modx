@@ -1,5 +1,9 @@
 # changelog
 
+## v2.1.2
+
+- feat: 新增 `useModel` & `withModel` 快捷方法
+
 ## v2.1.1
 
 - feat: 支持添加额外的 `redux middleware`
