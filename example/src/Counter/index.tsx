@@ -24,6 +24,7 @@ type Props = {
 const CounterClass = withModel(model)(
   class extends React.PureComponent<Props, any> {
     render() {
+      console.log('counterClass rendered');
       const { state, dispatchers } = this.props.model;
       return (
         <div>
