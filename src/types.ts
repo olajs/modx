@@ -4,7 +4,7 @@ export type ModelAction<T = any> = AnyAction & {
   payload?: Partial<T>;
 };
 
-export type ModelConfig<Namespace, State, Reducers, Effects> = {
+export type ModelConfig<Namespace = string, State = object, Reducers = object, Effects = object> = {
   namespace: Namespace;
   state: State;
   reducers: Reducers;

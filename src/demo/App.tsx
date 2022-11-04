@@ -1,6 +1,9 @@
 import React from 'react';
-import { useGlobalModel } from '..';
+import { useGlobalModel, createStore } from '..';
 import model from './testModel';
+
+const store = createStore({}, [model], { devTools: false });
+console.log(store);
 
 function App() {
   const { state, dispatchers } = useGlobalModel(model);

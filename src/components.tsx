@@ -1,22 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import { useStore } from 'react-redux';
 import { ModelConfig, Store, GetDispatchers } from './types';
+import { sameValue } from './utils';
 import { createSingleStore } from '.';
 
-export type UseModelResult<
-  T extends ModelConfig<T['namespace'], T['state'], T['reducers'], T['effects']>,
-> = Readonly<{
-  store: Readonly<Store>;
-  state: Readonly<T['state']>;
+export type SelectorFunction<State, ReturnValue> = (state: State) => ReturnValue | null | undefined;
+
+export type UseModelResult<T extends ModelConfig, Selector = null> = Readonly<{
+  store: Store;
+  state: Selector extends SelectorFunction<T['state'], infer ReturnValue>
+    ? Readonly<ReturnValue>
+    : Readonly<T['state']>;
   dispatchers: GetDispatchers<T['state'], T['reducers'], T['effects']>;
 }>;
 
 /**
  * 获取指定 modelConfig 的状态的 hooks
  */
-export function useModel<Namespace, State, Reducers, Effects>(
-  modelConfig: ModelConfig<Namespace, State, Reducers, Effects>,
-): UseModelResult<ModelConfig<Namespace, State, Reducers, Effects>> {
+export function useModel<T extends ModelConfig>(modelConfig: T): UseModelResult<T> {
   const { namespace } = modelConfig;
 
   // 自动判断是全局 model 还是组件内部 model
@@ -28,7 +29,7 @@ export function useModel<Namespace, State, Reducers, Effects>(
     return createSingleStore(modelConfig);
   });
 
-  const [state, setState] = useState<State>(store.getState()[namespace]);
+  const [state, setState] = useState<T['state']>(store.getState()[namespace]);
   const [dispatchers] = useState(() => getDispatchers(store, modelConfig));
   useEffect(() => {
     return store.subscribe(() => setState(store.getState()[namespace]));
@@ -40,16 +41,15 @@ export function useModel<Namespace, State, Reducers, Effects>(
 /**
  * 包装一个拥有指定 modelConfig 的状态的组件
  */
-export function withModel<Namespace, State, Reducers, Effects>(
-  modelConfig: ModelConfig<Namespace, State, Reducers, Effects>,
-) {
-  return (
-    SubComponent: React.ComponentType<{
-      model: UseModelResult<ModelConfig<Namespace, State, Reducers, Effects>>;
-      [key: string]: any;
-    }>,
+export function withModel<T extends ModelConfig>(modelConfig: T) {
+  return <OwnProps,>(
+    SubComponent: React.ComponentType<
+      OwnProps & {
+        model: UseModelResult<T>;
+      }
+    >,
   ) =>
-    React.memo(function withGlobalModelContainer(props: unknown) {
+    React.memo(function withGlobalModelContainer(props: OwnProps) {
       const model = useModel(modelConfig);
       return <SubComponent {...props} model={model} />;
     });
@@ -58,12 +58,10 @@ export function withModel<Namespace, State, Reducers, Effects>(
 /**
  * 获取指定 modelConfig 的全局状态的 hooks
  */
-export function useGlobalModel<Namespace, State, Reducers, Effects>(
-  modelConfig: ModelConfig<Namespace, State, Reducers, Effects>,
-): UseModelResult<ModelConfig<Namespace, State, Reducers, Effects>> {
+export function useGlobalModel<T extends ModelConfig>(modelConfig: T): UseModelResult<T> {
   const { namespace } = modelConfig;
   const store = useStore();
-  const [state, setState] = useState<State>(store.getState()[namespace]);
+  const [state, setState] = useState<T['state']>(store.getState()[namespace]);
   const [dispatchers] = useState(() => getDispatchers(store, modelConfig));
   useEffect(() => {
     return store.subscribe(() => setState(store.getState()[namespace]));
@@ -75,16 +73,15 @@ export function useGlobalModel<Namespace, State, Reducers, Effects>(
 /**
  * 包装一个拥有指定 modelConfig 的全局状态的组件
  */
-export function withGlobalModel<Namespace, State, Reducers, Effects>(
-  modelConfig: ModelConfig<Namespace, State, Reducers, Effects>,
-) {
-  return (
-    SubComponent: React.ComponentType<{
-      globalModel: UseModelResult<ModelConfig<Namespace, State, Reducers, Effects>>;
-      [key: string]: any;
-    }>,
+export function withGlobalModel<T extends ModelConfig>(modelConfig: T) {
+  return <OwnProps,>(
+    SubComponent: React.ComponentType<
+      OwnProps & {
+        globalModel: UseModelResult<T>;
+      }
+    >,
   ) =>
-    React.memo(function withGlobalModelContainer(props: unknown) {
+    React.memo(function withGlobalModelContainer(props: OwnProps) {
       const globalModel = useGlobalModel(modelConfig);
       return <SubComponent {...props} globalModel={globalModel} />;
     });
@@ -93,11 +90,9 @@ export function withGlobalModel<Namespace, State, Reducers, Effects>(
 /**
  * modelConfig 转 React hooks
  */
-export function useSingleModel<Namespace, State, Reducers, Effects>(
-  modelConfig: ModelConfig<Namespace, State, Reducers, Effects>,
-): UseModelResult<ModelConfig<Namespace, State, Reducers, Effects>> {
+export function useSingleModel<T extends ModelConfig>(modelConfig: T): UseModelResult<T> {
   const [store] = useState(createSingleStore(modelConfig));
-  const [state, setState] = useState<State>(store.getState()[modelConfig.namespace]);
+  const [state, setState] = useState<T['state']>(store.getState()[modelConfig.namespace]);
   const [dispatchers] = useState(() => {
     return getDispatchers(store, modelConfig);
   });
@@ -111,29 +106,85 @@ export function useSingleModel<Namespace, State, Reducers, Effects>(
 /**
  * 为 Class Component 包装一个 singleStore
  */
-export function withSingleModel<Namespace, State, Reducers, Effects>(
-  modelConfig: ModelConfig<Namespace, State, Reducers, Effects>,
-) {
-  return (
-    SubComponent: React.ComponentType<{
-      singleModel: UseModelResult<ModelConfig<Namespace, State, Reducers, Effects>>;
-      [key: string]: any;
-    }>,
+export function withSingleModel<T extends ModelConfig>(modelConfig: T) {
+  return <OwnProps,>(
+    SubComponent: React.ComponentType<
+      OwnProps & {
+        singleModel: UseModelResult<T>;
+      }
+    >,
   ) => {
-    return React.memo(function WithSingleModelContainer(props: unknown) {
+    return React.memo(function WithSingleModelContainer(props: OwnProps) {
       const singleModel = useSingleModel(modelConfig);
       return <SubComponent {...props} singleModel={singleModel} />;
     });
   };
 }
 
+// 缓存已创建过的 store
+const storeMap = new WeakMap();
+
+/**
+ * 使用一个共享的 model，可用在非全局 state 模式下几个组件共享状态的场景中
+ */
+export function useShareModel<T extends ModelConfig, ReturnValue = null>(
+  modelConfig: T,
+  selector?: SelectorFunction<T['state'], ReturnValue>,
+) {
+  const { namespace } = modelConfig;
+
+  // 如果 store 不存在，则创建一个
+  let store: Store = storeMap.get(modelConfig);
+  if (!store) {
+    store = createSingleStore(modelConfig);
+    storeMap.set(modelConfig, store);
+  }
+
+  const [state, setState] = useState<ReturnValue extends null ? T['state'] : ReturnValue>(
+    selector && typeof selector === 'function'
+      ? selector(store.getState()[namespace])
+      : store.getState()[namespace],
+  );
+  const [dispatchers] = useState(() => getDispatchers(store, modelConfig));
+  useEffect(() => {
+    return store.subscribe(() => {
+      const newState =
+        selector && typeof selector === 'function'
+          ? selector(store.getState()[namespace])
+          : store.getState()[namespace];
+      if (!sameValue(state, newState)) {
+        setState(newState);
+      }
+    });
+  }, [state]);
+
+  return { store, state, dispatchers };
+}
+
+/**
+ * 为 Class Component 包装一个 shareModel
+ */
+export function withShareModel<T extends ModelConfig, ReturnValue = null>(
+  modelConfig: T,
+  selector?: SelectorFunction<T['state'], ReturnValue>,
+) {
+  return <OwnProps,>(
+    SubComponent: React.ComponentType<
+      OwnProps & {
+        shareModel: UseModelResult<T, typeof selector>;
+      }
+    >,
+  ) =>
+    React.memo(function withShareModelContainer(props: OwnProps) {
+      const shareModel = useShareModel(modelConfig, selector);
+      return <SubComponent {...props} shareModel={shareModel} />;
+    });
+}
+
 /**
  * 获取指定 model 的 dispatchers 方法
  */
-function getDispatchers<S extends Store, Namespace, State, Reducers, Effects>(
-  store: S,
-  modelConfig: ModelConfig<Namespace, State, Reducers, Effects>,
-) {
+export function getDispatchers<S extends Store, T extends ModelConfig>(store: S, modelConfig: T) {
   const { namespace } = modelConfig;
   const result = {};
 
@@ -147,5 +198,5 @@ function getDispatchers<S extends Store, Namespace, State, Reducers, Effects>(
     });
   }
 
-  return result as GetDispatchers<State, Reducers, Effects>;
+  return result as GetDispatchers<T['state'], T['reducers'], T['effects']>;
 }

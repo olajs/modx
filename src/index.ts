@@ -10,7 +10,7 @@ export * from './components';
  */
 export function createStore<
   InitialState,
-  T extends ModelConfig<T['namespace'], T['state'], T['reducers'], T['effects']>,
+  T extends ModelConfig,
   Extra extends {
     devTools?: boolean;
     middlewares?: Middleware[];
@@ -38,8 +38,8 @@ export function createStore<
 /**
  * 接收单个 modelConfig 创建 redux store
  */
-export function createSingleStore<Namespace, State, Reducers, Effects>(
-  modelConfig: ModelConfig<Namespace, State, Reducers, Effects>,
+export function createSingleStore<T extends ModelConfig>(
+  modelConfig: T,
   middlewares?: Middleware[],
 ): Store {
   return createStore({}, [modelConfig], { middlewares });
@@ -48,7 +48,12 @@ export function createSingleStore<Namespace, State, Reducers, Effects>(
 /**
  * 包裹 model 声明配置，主要是为了类型推断
  **/
-export function createModel<Namespace, State, Reducers, Effects>(
+export function createModel<
+  Namespace extends string,
+  State extends object,
+  Reducers extends object,
+  Effects extends object,
+>(
   modelConfig: CreateModelOptions<Namespace, State, Reducers, Effects>,
 ): ModelConfig<Namespace, State, Reducers, Effects> {
   return modelConfig as any;

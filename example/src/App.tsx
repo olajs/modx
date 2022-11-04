@@ -2,9 +2,10 @@ import React from 'react';
 import { useModel } from '@olajs/modx';
 import model from './model';
 import Counter, { CounterClass } from './Counter';
+import ShareModel from './ShareModel';
 
 function Block({ children }) {
-  return <div style={{ paddingLeft: '40px' }}>{children}</div>;
+  return <div style={{ background: '#e7e7e7', padding: '10px' }}>{children}</div>;
 }
 
 function App() {
@@ -28,6 +29,10 @@ function App() {
         <Block>
           <CounterClass />
         </Block>
+      </Block>
+      <h3>Share Store</h3>
+      <Block>
+        <ShareModel />
       </Block>
     </div>
   );

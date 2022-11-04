@@ -7,7 +7,7 @@
   "scripts": {
     "build": "node ./scripts/build.js",
     "prepublish": "npm run build",
-    "example": "npm run build && cp -r lib/ example/node_modules/@olajs/modx/lib",
+    "example": "npm run build && cp -r lib/ example/node_modules/@olajs/modx/lib && rm -rf example/node_modules/.cache/default-development",
     "release": "npm publish",
     "release:next": "npm publish --tag next"
   },

@@ -29,12 +29,8 @@ function createReducer({ namespace, reducers = {}, state: initialState }): Reduc
 /**
  * 将 effects 解析成 redux middleware
  */
-function createMiddleware<Namespace, State, Reducers, Effects>({
-  namespace,
-  reducers,
-  effects,
-}: ModelConfig<Namespace, State, Reducers, Effects>): Middleware {
-  const converted = {};
+function createMiddleware<T extends ModelConfig>({ namespace, reducers, effects }: T): Middleware {
+  const converted: any = {};
 
   effects &&
     Object.keys(effects).forEach((actionType) => {
@@ -83,8 +79,8 @@ function createMiddleware<Namespace, State, Reducers, Effects>({
 /**
  * 解析 model 数据
  */
-export default function parseModel<Namespace, State, Reducers, Effects>(
-  modelConfig: ModelConfig<Namespace, State, Reducers, Effects>,
+export default function parseModel<T extends ModelConfig>(
+  modelConfig: T,
 ): {
   reducer: Reducer;
   middleware: Middleware;
