@@ -4,18 +4,21 @@ import { model } from './model';
 
 function Comp1() {
   console.log('share comp1 rendered');
-  const { state } = useShareModel(model, (state: typeof model.state) => ({
+  const { state } = useShareModel(model, (state) => ({
     value: state.value,
   }));
   return <div>Comp1: {state.value}</div>;
 }
 
-type Props = PropsWithChildren<{
-  shareModel: UseModelResult<typeof model>;
-}>;
+type Props = PropsWithChildren<{}>;
 
-const Comp2 = withShareModel(model)<PropsWithChildren<{}>>(
-  class extends React.PureComponent<Props, any> {
+const Comp2 = withShareModel(model)<Props>(
+  class extends React.PureComponent<
+    Props & {
+      shareModel: UseModelResult<typeof model>;
+    },
+    any
+  > {
     render() {
       console.log('share comp2 rendered');
       const { state, dispatchers } = this.props.shareModel;

@@ -16,6 +16,7 @@ function Counter() {
       <Comp3 name="Comp3">
         <Comp2 />
       </Comp3>
+      <Comp4 />
     </div>
   );
 }
@@ -39,17 +40,17 @@ type Props = PropsWithChildren<{
   test?: UseModelResult<typeof model>;
 }>;
 
-type MergedProps = Props & {
-  shareModel: UseModelResult<typeof model, typeof selector>;
-};
-
 const Comp3 = withShareModel(
   model,
   selector,
 )<Props>(
-  class extends React.PureComponent<MergedProps, any> {
+  class extends React.PureComponent<
+    Props & {
+      shareModel: UseModelResult<typeof model, typeof selector>;
+    },
+    any
+  > {
     render() {
-      console.log('share comp2 rendered');
       const { state } = this.props.shareModel;
       return (
         <span>
@@ -61,6 +62,19 @@ const Comp3 = withShareModel(
   },
 );
 
-export { Comp1, Comp2, Comp3 };
+const Comp4 = withShareModel(model)<{}>(
+  class extends React.PureComponent<{ shareModel: UseModelResult<typeof model> }, any> {
+    render() {
+      const { state } = this.props.shareModel;
+      return (
+        <span>
+          <span>{state.counter}</span>
+        </span>
+      );
+    }
+  },
+);
+
+export { Comp1, Comp2, Comp3, Comp4 };
 
 export default Counter;

@@ -6,7 +6,7 @@ const defaultValue = 'abc';
 export const model = createModel({
   namespace,
   state: {
-    value: defaultValue,
+    value: 'defaultValue',
     value2: '',
   },
   reducers: {
@@ -18,7 +18,8 @@ export const model = createModel({
       ...state,
       value2,
     }),
-    reset: () => ({
+    reset: (state) => ({
+      ...state,
       value: defaultValue,
       value2: '',
     }),

@@ -4,13 +4,17 @@ import { ModelConfig, Store, GetDispatchers } from './types';
 import { sameValue } from './utils';
 import { createSingleStore } from '.';
 
-export type SelectorFunction<State, ReturnValue> = (state: State) => ReturnValue | null | undefined;
+export type SelectorFunction<State, ReturnValue = null> = (state: State) => ReturnValue;
 
 export type UseModelResult<T extends ModelConfig, Selector = null> = Readonly<{
   store: Store;
-  state: Selector extends SelectorFunction<T['state'], infer ReturnValue>
-    ? Readonly<ReturnValue>
-    : Readonly<T['state']>;
+  state: Readonly<
+    Selector extends SelectorFunction<T['state'], infer ReturnValue>
+      ? ReturnValue extends null
+        ? T['state']
+        : ReturnValue
+      : T['state']
+  >;
   dispatchers: GetDispatchers<T['state'], T['reducers'], T['effects']>;
 }>;
 
@@ -122,21 +126,20 @@ export function withSingleModel<T extends ModelConfig>(modelConfig: T) {
 }
 
 // 缓存已创建过的 store
-const storeMap = new WeakMap();
+const storeMap = new WeakMap<ModelConfig, Store>();
 
 /**
  * 使用一个共享的 model，可用在非全局 state 模式下几个组件共享状态的场景中
  */
 export function useShareModel<T extends ModelConfig, ReturnValue = null>(
   modelConfig: T,
-  selector?: SelectorFunction<T['state'], ReturnValue>,
-) {
+  selector: SelectorFunction<T['state'], ReturnValue> | null = null,
+): UseModelResult<T, typeof selector> {
   const { namespace } = modelConfig;
 
   // 如果 store 不存在，则创建一个
-  let store: Store = storeMap.get(modelConfig);
-  if (!store) {
-    store = createSingleStore(modelConfig);
+  let store: Store = storeMap.get(modelConfig) || createSingleStore(modelConfig);
+  if (!storeMap.has(modelConfig)) {
     storeMap.set(modelConfig, store);
   }
 
@@ -166,7 +169,7 @@ export function useShareModel<T extends ModelConfig, ReturnValue = null>(
  */
 export function withShareModel<T extends ModelConfig, ReturnValue = null>(
   modelConfig: T,
-  selector?: SelectorFunction<T['state'], ReturnValue>,
+  selector: SelectorFunction<T['state'], ReturnValue> | null = null,
 ) {
   return <OwnProps,>(
     SubComponent: React.ComponentType<
