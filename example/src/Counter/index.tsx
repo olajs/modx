@@ -1,10 +1,10 @@
 import React from 'react';
-import { useModel, UseModelResult, withModel } from '@olajs/modx';
+import { useSingleModel, UseModelResult, withModel } from '@olajs/modx';
 import model from './model';
 
 function Counter() {
   console.log('counter rendered');
-  const { state, dispatchers } = useModel(model);
+  const { state, dispatchers } = useSingleModel(model);
   return (
     <div>
       <p>
@@ -21,7 +21,7 @@ type Props = {
   model: UseModelResult<typeof model>;
 };
 
-const CounterClass = withModel(model)(
+const CounterClass = withModel(model)<{}>(
   class extends React.PureComponent<Props, any> {
     render() {
       console.log('counterClass rendered');

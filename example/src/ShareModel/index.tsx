@@ -15,13 +15,13 @@ type Props = PropsWithChildren<{}>;
 const Comp2 = withShareModel(model)<Props>(
   class extends React.PureComponent<
     Props & {
-      shareModel: UseModelResult<typeof model>;
+      model: UseModelResult<typeof model>;
     },
     any
   > {
     render() {
       console.log('share comp2 rendered');
-      const { state, dispatchers } = this.props.shareModel;
+      const { state, dispatchers } = this.props.model;
       return (
         <span>
           <span>Comp2:</span>

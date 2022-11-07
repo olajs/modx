@@ -8,7 +8,7 @@ export type ModelConfig<Namespace = string, State = object, Reducers = object, E
   namespace: Namespace;
   state: State;
   reducers: Reducers;
-  effects?: Effects;
+  effects: Effects;
 };
 
 type ReducerFunction<State, FunctionValue> = FunctionValue extends (state: State) => State

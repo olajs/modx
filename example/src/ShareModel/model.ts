@@ -6,7 +6,7 @@ const defaultValue = 'abc';
 export const model = createModel({
   namespace,
   state: {
-    value: 'defaultValue',
+    value: defaultValue,
     value2: '',
   },
   reducers: {

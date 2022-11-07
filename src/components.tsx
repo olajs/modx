@@ -4,8 +4,30 @@ import { ModelConfig, Store, GetDispatchers } from './types';
 import { sameValue } from './utils';
 import { createSingleStore } from '.';
 
-export type SelectorFunction<State, ReturnValue = null> = (state: State) => ReturnValue;
+enum StoreType {
+  // 全局 store
+  Global,
+  // 单组件 store
+  Single,
+  // 多组件共享 store
+  Share,
+  // 通过 namespace 自动判断是，Global 有则使用 Global，否则使用 Single
+  Auto,
+}
 
+type SelectorFunction<State, ReturnValue = null> = (state: State) => ReturnValue;
+
+// 构建默认的 Selector ReturnValue
+type DefaultReturnValue<T extends ModelConfig, Selector> = Selector extends SelectorFunction<
+  T['state'],
+  infer Val
+>
+  ? Val
+  : T['state'];
+
+/**
+ * 构建指定 Model 和 Selector 的 useXXX hooks 返回值
+ */
 export type UseModelResult<T extends ModelConfig, Selector = null> = Readonly<{
   store: Store;
   state: Readonly<
@@ -18,130 +40,40 @@ export type UseModelResult<T extends ModelConfig, Selector = null> = Readonly<{
   dispatchers: GetDispatchers<T['state'], T['reducers'], T['effects']>;
 }>;
 
-/**
- * 获取指定 modelConfig 的状态的 hooks
- */
-export function useModel<T extends ModelConfig>(modelConfig: T): UseModelResult<T> {
-  const { namespace } = modelConfig;
-
-  // 自动判断是全局 model 还是组件内部 model
-  const storeGlobal = useStore();
-  const [store] = useState(() => {
-    if (namespace in storeGlobal.getState()) {
-      return storeGlobal;
-    }
-    return createSingleStore(modelConfig);
-  });
-
-  const [state, setState] = useState<T['state']>(store.getState()[namespace]);
-  const [dispatchers] = useState(() => getDispatchers(store, modelConfig));
-  useEffect(() => {
-    return store.subscribe(() => setState(store.getState()[namespace]));
-  }, []);
-
-  return { store, state, dispatchers };
-}
-
-/**
- * 包装一个拥有指定 modelConfig 的状态的组件
- */
-export function withModel<T extends ModelConfig>(modelConfig: T) {
-  return <OwnProps,>(
-    SubComponent: React.ComponentType<
-      OwnProps & {
-        model: UseModelResult<T>;
-      }
-    >,
-  ) =>
-    React.memo(function withGlobalModelContainer(props: OwnProps) {
-      const model = useModel(modelConfig);
-      return <SubComponent {...props} model={model} />;
-    });
-}
-
-/**
- * 获取指定 modelConfig 的全局状态的 hooks
- */
-export function useGlobalModel<T extends ModelConfig>(modelConfig: T): UseModelResult<T> {
-  const { namespace } = modelConfig;
-  const store = useStore();
-  const [state, setState] = useState<T['state']>(store.getState()[namespace]);
-  const [dispatchers] = useState(() => getDispatchers(store, modelConfig));
-  useEffect(() => {
-    return store.subscribe(() => setState(store.getState()[namespace]));
-  }, []);
-
-  return { store, state, dispatchers };
-}
-
-/**
- * 包装一个拥有指定 modelConfig 的全局状态的组件
- */
-export function withGlobalModel<T extends ModelConfig>(modelConfig: T) {
-  return <OwnProps,>(
-    SubComponent: React.ComponentType<
-      OwnProps & {
-        globalModel: UseModelResult<T>;
-      }
-    >,
-  ) =>
-    React.memo(function withGlobalModelContainer(props: OwnProps) {
-      const globalModel = useGlobalModel(modelConfig);
-      return <SubComponent {...props} globalModel={globalModel} />;
-    });
-}
-
-/**
- * modelConfig 转 React hooks
- */
-export function useSingleModel<T extends ModelConfig>(modelConfig: T): UseModelResult<T> {
-  const [store] = useState(createSingleStore(modelConfig));
-  const [state, setState] = useState<T['state']>(store.getState()[modelConfig.namespace]);
-  const [dispatchers] = useState(() => {
-    return getDispatchers(store, modelConfig);
-  });
-
-  useEffect(() => {
-    return store.subscribe(() => setState(store.getState()[modelConfig.namespace]));
-  }, []);
-  return { store, state, dispatchers };
-}
-
-/**
- * 为 Class Component 包装一个 singleStore
- */
-export function withSingleModel<T extends ModelConfig>(modelConfig: T) {
-  return <OwnProps,>(
-    SubComponent: React.ComponentType<
-      OwnProps & {
-        singleModel: UseModelResult<T>;
-      }
-    >,
-  ) => {
-    return React.memo(function WithSingleModelContainer(props: OwnProps) {
-      const singleModel = useSingleModel(modelConfig);
-      return <SubComponent {...props} singleModel={singleModel} />;
-    });
-  };
-}
-
 // 缓存已创建过的 store
 const storeMap = new WeakMap<ModelConfig, Store>();
 
 /**
- * 使用一个共享的 model，可用在非全局 state 模式下几个组件共享状态的场景中
+ * 公共的 hooks，共 useXXModel 使用
  */
-export function useShareModel<T extends ModelConfig, ReturnValue = null>(
-  modelConfig: T,
-  selector: SelectorFunction<T['state'], ReturnValue> | null = null,
-): UseModelResult<T, typeof selector> {
+function useModelCommon<
+  T extends ModelConfig,
+  Selector extends SelectorFunction<T['state'], ReturnValue> | null | undefined,
+  ReturnValue = DefaultReturnValue<T, Selector>,
+>(storeType: StoreType, modelConfig: T, selector?: Selector) {
   const { namespace } = modelConfig;
 
-  // 如果 store 不存在，则创建一个
-  let store: Store = storeMap.get(modelConfig) || createSingleStore(modelConfig);
-  if (!storeMap.has(modelConfig)) {
-    storeMap.set(modelConfig, store);
-  }
+  // 创建 store，默认使用全局 store
+  const storeGlobal = useStore();
+  const [store] = useState(() => {
+    let initStore: Store = storeGlobal;
+    // 自动判断是全局 model 还是组件内部 model
+    if (storeType === StoreType.Auto) {
+      if (namespace in storeGlobal.getState()) {
+        initStore = storeGlobal;
+      } else {
+        initStore = createSingleStore(modelConfig);
+      }
+    } else if (storeType === StoreType.Single) {
+      initStore = createSingleStore(modelConfig);
+    } else if (storeType === StoreType.Share) {
+      initStore = storeMap.get(modelConfig) || createSingleStore(modelConfig);
+      if (!storeMap.has(modelConfig)) {
+        storeMap.set(modelConfig, initStore);
+      }
+    }
+    return initStore;
+  });
 
   const [state, setState] = useState<ReturnValue extends null ? T['state'] : ReturnValue>(
     selector && typeof selector === 'function'
@@ -165,23 +97,112 @@ export function useShareModel<T extends ModelConfig, ReturnValue = null>(
 }
 
 /**
- * 为 Class Component 包装一个 shareModel
+ * 公共 withXXXModel，包装一个拥有指定 modelConfig 的状态的组件
  */
-export function withShareModel<T extends ModelConfig, ReturnValue = null>(
+function withModelCommon<T extends ModelConfig, ReturnValue = null>(
+  storeType: StoreType,
   modelConfig: T,
-  selector: SelectorFunction<T['state'], ReturnValue> | null = null,
+  selector?: SelectorFunction<T['state'], ReturnValue>,
 ) {
   return <OwnProps,>(
     SubComponent: React.ComponentType<
       OwnProps & {
-        shareModel: UseModelResult<T, typeof selector>;
+        model: UseModelResult<T, typeof selector>;
       }
     >,
   ) =>
-    React.memo(function withShareModelContainer(props: OwnProps) {
-      const shareModel = useShareModel(modelConfig, selector);
-      return <SubComponent {...props} shareModel={shareModel} />;
+    React.memo(function withGlobalModelContainer(props: OwnProps) {
+      const model = useModelCommon<T, typeof selector, ReturnValue>(
+        storeType,
+        modelConfig,
+        selector,
+      );
+      return <SubComponent {...props} model={model} />;
     });
+}
+
+/**
+ * 获取指定 modelConfig 的状态的 hooks，优先从全局状态找，找不到则创建一个单组件状态
+ */
+export function useModel<
+  T extends ModelConfig,
+  Selector extends SelectorFunction<T['state'], ReturnValue> | null | undefined,
+  ReturnValue = DefaultReturnValue<T, Selector>,
+>(modelConfig: T, selector?: Selector) {
+  return useModelCommon<T, Selector, ReturnValue>(StoreType.Auto, modelConfig, selector);
+}
+
+/**
+ * 包装一个拥有指定 modelConfig 的状态的组件，优先从全局状态找，找不到则创建一个单组件状态
+ */
+export function withModel<T extends ModelConfig, ReturnValue = null>(
+  modelConfig: T,
+  selector?: SelectorFunction<T['state'], ReturnValue>,
+) {
+  return withModelCommon(StoreType.Auto, modelConfig, selector);
+}
+
+/**
+ * 获取指定 modelConfig 的全局状态的 hooks
+ */
+export function useGlobalModel<
+  T extends ModelConfig,
+  Selector extends SelectorFunction<T['state'], ReturnValue> | null | undefined,
+  ReturnValue = DefaultReturnValue<T, Selector>,
+>(modelConfig: T, selector?: Selector) {
+  return useModelCommon<T, Selector, ReturnValue>(StoreType.Global, modelConfig, selector);
+}
+
+/**
+ * 包装一个拥有指定 modelConfig 的全局状态的组件
+ */
+export function withGlobalModel<T extends ModelConfig, ReturnValue = null>(
+  modelConfig: T,
+  selector?: SelectorFunction<T['state'], ReturnValue>,
+) {
+  return withModelCommon(StoreType.Global, modelConfig, selector);
+}
+
+/**
+ * 获取指定 modelConfig 的单组件状态的 hooks
+ */
+export function useSingleModel<
+  T extends ModelConfig,
+  Selector extends SelectorFunction<T['state'], ReturnValue> | null | undefined,
+  ReturnValue = DefaultReturnValue<T, Selector>,
+>(modelConfig: T, selector?: Selector) {
+  return useModelCommon<T, Selector, ReturnValue>(StoreType.Single, modelConfig, selector);
+}
+
+/**
+ * 为 Class Component 包装一个单组件状态 singleModel
+ */
+export function withSingleModel<T extends ModelConfig, ReturnValue = null>(
+  modelConfig: T,
+  selector?: SelectorFunction<T['state'], ReturnValue>,
+) {
+  return withModelCommon(StoreType.Single, modelConfig, selector);
+}
+
+/**
+ * 获取指定 modelConfig 的共享状态的 hooks，可用在非全局 state 模式下几个组件共享状态的场景中
+ */
+export function useShareModel<
+  T extends ModelConfig,
+  Selector extends SelectorFunction<T['state'], ReturnValue> | null | undefined,
+  ReturnValue = DefaultReturnValue<T, Selector>,
+>(modelConfig: T, selector?: Selector) {
+  return useModelCommon<T, Selector, ReturnValue>(StoreType.Share, modelConfig, selector);
+}
+
+/**
+ * 为 Class Component 包装一个共享组件状态 shareModel，可用在非全局 state 模式下几个组件共享状态的场景中
+ */
+export function withShareModel<T extends ModelConfig, ReturnValue = null>(
+  modelConfig: T,
+  selector?: SelectorFunction<T['state'], ReturnValue>,
+) {
+  return withModelCommon(StoreType.Share, modelConfig, selector);
 }
 
 /**

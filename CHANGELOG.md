@@ -31,6 +31,7 @@
 ### Breaking Changes
 
 - `model` 配置需要通过 `createModel` 方法包裹
+
   ```javascript
   import { createModel } from '@olajs/modx';
   export default createModel({
@@ -41,6 +42,7 @@
     },
   });
   ```
+
 - `UseGlobalModel` 和 `withGlobalModel` 参数改为传 `model`（1.x 传 `namespace`）
 - 不再需要手动声明 `StateType` 和 `Dispatchers` 类型
 - `tsconfig.json` 文件需要开启 `"noImplicitThis": true`
@@ -66,7 +68,3 @@
 ## v1.0.0
 
 first release
-
-```
-
-```
