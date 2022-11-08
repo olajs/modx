@@ -3,6 +3,7 @@
 ## v3.0.0-alpha.0
 
 - feat: 新增 shareModel，多个组件可共享局部状态
+- feat: 新增 selector 以减少组件不必要的重复渲染
 
 ### BREAKING CHANGES
 

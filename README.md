@@ -22,6 +22,7 @@ $ yarn add @olajs/modx
 - [Using in Function Component](#using-in-function-component)
 - [Using async logic](#using-async-logic)
 - [useModel & withModel](#usemodel--withmodel)
+- [shareModel](#sharemodel--selector)
 
 ### Create model
 
@@ -230,7 +231,7 @@ export default useSingleModelB;
 
 ## useModel & withModel
 
-Simple way of `useGlobalModel/useSingleModel` or `withGlobalModel/withSingleModel` methods.
+Simple way of `useGlobalModel/withGlobalModel` (global state) and `useSingleModel/withSingleModel` (component state) methods.
 
 When use `useModel` hooks (since modx@2.1.2), `modx` will use `model` in global state first, if not exists, `modx`
 will create a local state for it.
@@ -262,6 +263,43 @@ function UseModelExample() {
 
 export default UseModelExample;
 ```
+
+## shareModel & selector
+
+> since @olajs/modx@3.x
+
+In some situation, more than one component will share some states which are not in global state.
+Then you can use `useShareModel/withShareModel`，`shareModel` will create each `modelConfig` file
+per store. So use `useShareModel/withShareModel` in different components with same `modelConfig` file
+will get same store object, states and dispatchers of this store will be shared in these components.
+
+For example：
+
+- `Comp1` and `Comp2` share states
+- `selector` function used to prevent useless rerender
+
+```typescript jsx
+import React from 'react';
+import { useShareModel } from '@olajs/modx';
+import { model } from './modelA';
+
+function Comp1() {
+  // only rerender when 'counter' changed
+  const selector = (state) => ({ counter: state.counter });
+  const { state } = useShareModel(model, selector);
+  return <div> {state.counter}</div>;
+}
+
+function Comp2() {
+  // only rerender when 'counting' changed
+  const selector = (state) => ({ counting: state.counting });
+  const { state } = useShareModel(model, selector);
+  console.log('share Comp3 rendered');
+  return <div>{state.counting}</div>;
+}
+```
+
+> See /example directory to find more usage
 
 ## Thanks
 
