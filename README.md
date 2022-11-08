@@ -281,7 +281,7 @@ For example：
 ```typescript jsx
 import React from 'react';
 import { useShareModel } from '@olajs/modx';
-import { model } from './modelA';
+import model from './modelA';
 
 function Comp1() {
   // only rerender when 'counter' changed
