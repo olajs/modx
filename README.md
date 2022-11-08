@@ -276,7 +276,7 @@ will get same store object, states and dispatchers of this store will be shared 
 For example：
 
 - `Comp1` and `Comp2` share states
-- `selector` function used to prevent useless rerender
+- `selector` function used to prevent useless re-render
 
 ```typescript jsx
 import React from 'react';
@@ -284,14 +284,14 @@ import { useShareModel } from '@olajs/modx';
 import model from './modelA';
 
 function Comp1() {
-  // only rerender when 'counter' changed
+  // only re-render when 'counter' changed
   const selector = (state) => ({ counter: state.counter });
   const { state } = useShareModel(model, selector);
   return <div> {state.counter}</div>;
 }
 
 function Comp2() {
-  // only rerender when 'counting' changed
+  // only re-render when 'counting' changed
   const selector = (state) => ({ counting: state.counting });
   const { state } = useShareModel(model, selector);
   console.log('share Comp3 rendered');

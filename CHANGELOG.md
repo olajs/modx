@@ -1,14 +1,14 @@
 # changelog
 
-## v3.0.0-alpha.0
+## v3.0.0
 
-- feat: 新增 shareModel，多个组件可共享局部状态
-- feat: 新增 selector 以减少组件不必要的重复渲染
+- feat: 新增 `shareModel`，多个组件可共享局部状态
+- feat: 新增 `selector` 函数以减少组件不必要的重复渲染
 
 ### BREAKING CHANGES
 
-- `withGlobalModel` 高阶组件参数 `globalModel` 改为 `model`
-- `withSingleModel` 高阶组件参数 `singleModel` 改为 `model`
+- `withGlobalModel` 高阶组件传入子组件 `props` 的 `globalModel` 改为 `model`
+- `withSingleModel` 高阶组件传入子组件 `props` 的 `singleModel` 改为 `model`
 
 ## v2.1.2
 
