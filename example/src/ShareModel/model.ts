@@ -24,4 +24,18 @@ export const model = createModel({
       value2: '',
     }),
   },
+  effects: {
+    test1(arg1: string) {
+      console.log(arg1);
+    },
+    test2() {
+      console.log('no parameters');
+    },
+    async test3() {
+      console.log('async no parameters');
+    },
+    async test4(arg1: number) {
+      console.log(arg1);
+    },
+  },
 });

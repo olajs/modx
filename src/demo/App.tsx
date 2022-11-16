@@ -16,7 +16,7 @@ function App() {
       <button onClick={() => dispatchers.setCounting(!state.counting)}>set counting</button>
       <button onClick={() => dispatchers.plus()}>+</button>
       <button onClick={() => dispatchers.minus()}>-</button>
-      <p>async</p>
+      <p onClick={dispatchers.simple}>async</p>
       <button onClick={() => dispatchers.plusAsync(1000)}>+</button>
       <button onClick={() => dispatchers.minusAsync(2000)}>-</button>
     </div>

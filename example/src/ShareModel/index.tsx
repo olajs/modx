@@ -22,6 +22,12 @@ const Comp2 = withShareModel(model)<Props>(
     render() {
       console.log('share comp2 rendered');
       const { state, dispatchers } = this.props.model;
+
+      dispatchers.test1('test1');
+      dispatchers.test2();
+      dispatchers.test3();
+      dispatchers.test4(1);
+
       return (
         <span>
           <span>Comp2:</span>

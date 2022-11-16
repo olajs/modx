@@ -17,7 +17,7 @@ const model = createModel({
     minus: (state) => ({ ...state, counter: state.counter - 1 }),
   },
   effects: {
-    plusAsync(timeout: number) {
+    async plusAsync(timeout: number) {
       const { counting } = this.prevState;
       if (counting) return;
 
@@ -38,6 +38,9 @@ const model = createModel({
         this.minus();
         this.setCounting(false);
       }, timeout);
+    },
+    simple() {
+      console.log('no parameter');
     },
   },
 });

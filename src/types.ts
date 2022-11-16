@@ -51,7 +51,9 @@ export type CreateModelOptions<Namespace, State, Reducers, Effects> = {
 
 export type GetDispatchers<State, Reducers, Effects> = Readonly<
   {
-    [key in keyof Effects]: Effects[key];
+    [key in keyof Effects]: Effects[key] extends (payload?: any) => any
+      ? (...args: Parameters<Effects[key]>) => void
+      : Effects[key];
   } & {
     [key in keyof Reducers]: ReducerFunction<State, Reducers[key]>;
   }
