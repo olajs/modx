@@ -1,6 +1,6 @@
 {
   "name": "@olajs/modx",
-  "version": "3.0.0-alpha.1",
+  "version": "3.0.0-alpha.2",
   "description": "modx is a lightweight library to help developer use redux in a simple way",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",

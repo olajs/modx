@@ -54,12 +54,17 @@ function useModelCommon<
   const { namespace } = modelConfig;
 
   // 创建 store，默认使用全局 store
-  const storeGlobal = useStore();
+  let storeGlobal;
+  try {
+    storeGlobal = useStore();
+  } catch (e) {
+    console.warn(e);
+  }
   const [store] = useState(() => {
     let initStore: Store = storeGlobal;
     // 自动判断是全局 model 还是组件内部 model
     if (storeType === StoreType.Auto) {
-      if (namespace in storeGlobal.getState()) {
+      if (storeGlobal && namespace in storeGlobal.getState()) {
         initStore = storeGlobal;
       } else {
         initStore = createSingleStore(modelConfig);
