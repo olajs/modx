@@ -58,7 +58,9 @@ function useModelCommon<
   try {
     storeGlobal = useStore();
   } catch (e) {
-    console.warn(e);
+    if (process.env.NODE_ENV !== 'production') {
+      console.warn(e);
+    }
   }
   const [store] = useState(() => {
     let initStore: Store = storeGlobal;
