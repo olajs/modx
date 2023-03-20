@@ -57,11 +57,8 @@ function useModelCommon<
   let storeGlobal;
   try {
     storeGlobal = useStore();
-  } catch (e) {
-    if (process.env.NODE_ENV !== 'production') {
-      console.warn(e);
-    }
-  }
+  } catch (e) {}
+
   const [store] = useState(() => {
     let initStore: Store = storeGlobal;
     // 自动判断是全局 model 还是组件内部 model
