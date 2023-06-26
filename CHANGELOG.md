@@ -1,5 +1,9 @@
 # changelog
 
+## v3.0.1
+
+- feat: `effects` 方法支持泛型类型
+
 ## v3.0.0
 
 - feat: 新增 `shareModel`，多个组件可共享局部状态

@@ -18,6 +18,11 @@ function Counter() {
   const { state: state4 } = useSingleModel(model);
   const { state: state5 } = useSingleModel(model, selector);
   console.log('counter rendered');
+
+  dispatchers.simple();
+
+  dispatchers.cusType('sds');
+
   return (
     <div>
       <p>

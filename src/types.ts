@@ -17,8 +17,10 @@ type ReducerFunction<State, FunctionValue> = FunctionValue extends (state: State
   ? (payload: Args) => void
   : never;
 
-type EffectFunction<FunctionValue> = FunctionValue extends (payload?: any) => void
-  ? FunctionValue
+type EffectFunction<FunctionValue> = FunctionValue extends () => any
+  ? () => void
+  : FunctionValue extends (arg: unknown) => any
+  ? <Arg = Parameters<FunctionValue>[0]>(arg: Arg) => void
   : (payload?: any) => void;
 
 export type CreateModelOptions<Namespace, State, Reducers, Effects> = {
@@ -29,7 +31,7 @@ export type CreateModelOptions<Namespace, State, Reducers, Effects> = {
   };
   // 注意：ThisType 依赖 TS 配置项：noImplicitThis: true，否则在 effects 中没有 this 的自动提示
   effects?: {
-    [key in keyof Effects]: EffectFunction<Effects[key]>;
+    [key in keyof Effects]: Effects[key];
   } & ThisType<
     Readonly<
       {
@@ -51,8 +53,10 @@ export type CreateModelOptions<Namespace, State, Reducers, Effects> = {
 
 export type GetDispatchers<State, Reducers, Effects> = Readonly<
   {
-    [key in keyof Effects]: Effects[key] extends (payload?: any) => any
-      ? (...args: Parameters<Effects[key]>) => void
+    [key in keyof Effects]: Effects[key] extends () => any
+      ? () => void
+      : Effects[key] extends (arg: unknown) => any
+      ? <Arg = Parameters<Effects[key]>[0]>(arg: Arg) => void
       : Effects[key];
   } & {
     [key in keyof Reducers]: ReducerFunction<State, Reducers[key]>;
