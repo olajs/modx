@@ -5,6 +5,8 @@ import configureStore from './configureStore';
 
 export * from './components';
 
+window.__MODX_SHOW_LOG__ = true;
+
 /**
  * 创建一个 redux store 实例
  */
@@ -59,4 +61,11 @@ export function createModel<
   return modelConfig as any;
 }
 
-export { Store, ModelConfig, ModelAction, Reducer, Dispatch };
+/**
+ * 设置是否打印 modx 状态变更日志
+ */
+export function showLog(show: boolean) {
+  window.__MODX_SHOW_LOG__ = show;
+}
+
+export type { Store, ModelConfig, ModelAction, Reducer, Dispatch };

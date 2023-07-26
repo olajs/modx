@@ -19,6 +19,11 @@ function createReducer({ namespace, reducers = {}, state: initialState }): Reduc
 
   return function (state = initialState, action) {
     if (converted.hasOwnProperty(action.type)) {
+      try {
+        if (process.env.NODE_ENV === 'development' && window.__MODX_SHOW_LOG__) {
+          console.log(`[modx]`, action);
+        }
+      } catch (e) {}
       return converted[action.type](state, action.payload);
     }
 
@@ -71,6 +76,11 @@ function createMiddleware<T extends ModelConfig>({ namespace, reducers, effects 
           };
         });
 
+      try {
+        if (process.env.NODE_ENV === 'development' && window.__MODX_SHOW_LOG__) {
+          console.log(`[modx]`, action);
+        }
+      } catch (e) {}
       converted[action.type].call(thisType, action.payload);
     }
   };
