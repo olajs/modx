@@ -1,5 +1,9 @@
 # changelog
 
+## v3.0.2
+
+- feat: 显示 state 变更日志
+
 ## v3.0.1
 
 - feat: `effects` 方法支持泛型类型
