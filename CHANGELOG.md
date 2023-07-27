@@ -1,5 +1,9 @@
 # changelog
 
+## v3.0.4
+
+- chore: `effects` 无需泛型
+
 ## v3.0.2
 
 - feat: 显示 state 变更日志
