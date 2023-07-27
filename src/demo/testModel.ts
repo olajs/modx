@@ -42,9 +42,6 @@ const model = createModel({
     simple() {
       console.log('no parameter');
     },
-    cusType<CustomType>(arg: CustomType) {
-      console.log(arg);
-    },
   },
 });
 

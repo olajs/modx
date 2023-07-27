@@ -17,10 +17,8 @@ type ReducerFunction<State, FunctionValue> = FunctionValue extends (state: State
   ? (payload: Args) => void
   : never;
 
-type EffectFunction<FunctionValue> = FunctionValue extends () => any
-  ? () => void
-  : FunctionValue extends (arg: unknown) => any
-  ? <Arg = Parameters<FunctionValue>[0]>(arg: Arg) => void
+type EffectFunction<FunctionValue> = FunctionValue extends (payload?: any) => void
+  ? FunctionValue
   : (payload?: any) => void;
 
 export type CreateModelOptions<Namespace, State, Reducers, Effects> = {
@@ -53,10 +51,8 @@ export type CreateModelOptions<Namespace, State, Reducers, Effects> = {
 
 export type GetDispatchers<State, Reducers, Effects> = Readonly<
   {
-    [key in keyof Effects]: Effects[key] extends () => any
-      ? () => void
-      : Effects[key] extends (arg: unknown) => any
-      ? <Arg = Parameters<Effects[key]>[0]>(arg: Arg) => void
+    [key in keyof Effects]: Effects[key] extends (payload?: any) => any
+      ? (...args: Parameters<Effects[key]>) => void
       : Effects[key];
   } & {
     [key in keyof Reducers]: ReducerFunction<State, Reducers[key]>;

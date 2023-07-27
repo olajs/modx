@@ -21,8 +21,6 @@ function Counter() {
 
   dispatchers.simple();
 
-  dispatchers.cusType('sds');
-
   return (
     <div>
       <p>
