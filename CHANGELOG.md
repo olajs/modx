@@ -1,5 +1,9 @@
 # changelog
 
+## v3.0.5
+
+- feat: 为 `effects` 和 `dispatchers` 新增 `getState` 和 `setState` 快捷方法
+
 ## v3.0.4
 
 - chore: `effects` 无需泛型
