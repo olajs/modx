@@ -42,6 +42,10 @@ export type CreateModelOptions<Namespace, State, Reducers, Effects> = {
         next: Dispatch;
         // 将当前 model 的 state 直接获取了传参，方便开发人员获取
         prevState: Readonly<State>;
+        // 从 store 中获取最新的 state 数据
+        getState(): State;
+        // 更新 state 状态，直接调用内置的 setState reducer 方法
+        setState(state: Partial<State>);
         // 简化 store.dispatch() 方法的调用
         dispatcher(actionType: string, payload?: any): void;
       }
@@ -56,6 +60,9 @@ export type GetDispatchers<State, Reducers, Effects> = Readonly<
       : Effects[key];
   } & {
     [key in keyof Reducers]: ReducerFunction<State, Reducers[key]>;
+  } & {
+    getState(): State;
+    setState(state: Partial<State>);
   }
 >;
 

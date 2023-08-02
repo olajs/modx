@@ -21,6 +21,8 @@ function Counter() {
 
   dispatchers.simple();
 
+  console.log('state from getState:', dispatchers.getState());
+
   return (
     <div>
       <p>
@@ -28,6 +30,7 @@ function Counter() {
       </p>
       <button onClick={() => dispatchers.plus()}>+</button>
       <button onClick={() => dispatchers.minus()}>-</button>
+      <button onClick={() => dispatchers.setState({ counter: 500 })}>setState(500)</button>
       <p>async</p>
       <button onClick={() => dispatchers.plusAsync(1000)}>+</button>
       <button onClick={() => dispatchers.minusAsync(2000)}>-</button>

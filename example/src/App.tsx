@@ -11,6 +11,8 @@ function Block({ children }) {
 function App() {
   const { state, dispatchers } = useModel(model);
   console.log('app rendered');
+  console.log('state from getState:', dispatchers.getState());
+
   return (
     <div>
       <h3>Global Model</h3>
@@ -18,6 +20,7 @@ function App() {
         <p>counter: {state.counter}</p>
         <button onClick={() => dispatchers.plus()}>+</button>
         <button onClick={() => dispatchers.minus()}>-</button>
+        <button onClick={() => dispatchers.setState({ counter: 500 })}>setState(500)</button>
       </Block>
       <h3>Single Model</h3>
       <Block>

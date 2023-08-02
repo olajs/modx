@@ -214,7 +214,14 @@ export function withShareModel<T extends ModelConfig, ReturnValue = null>(
  */
 export function getDispatchers<S extends Store, T extends ModelConfig>(store: S, modelConfig: T) {
   const { namespace } = modelConfig;
-  const result = {};
+  const result = {
+    getState(): T['state'] {
+      return store.getState()[namespace];
+    },
+    setState(state: Partial<T['state']>) {
+      store.dispatch({ type: `${namespace}/setState`, payload: state });
+    },
+  };
 
   Object.keys(modelConfig.reducers).forEach((key: string) => {
     result[key] = (payload: any) => store.dispatch({ type: `${namespace}/${key}`, payload });

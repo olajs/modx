@@ -2,13 +2,27 @@ import { ModelConfig } from './types';
 import { Middleware, Reducer } from 'redux';
 
 // 要注入的 effects 的 this 属性
-const EFFECT_THIS_KEYS = ['namespace', 'store', 'next', 'prevState', 'dispatcher'];
+const EFFECT_THIS_KEYS = [
+  'namespace',
+  'store',
+  'next',
+  'prevState',
+  'dispatcher',
+  'setState',
+  'getState',
+];
 
 /**
  * 创建一个 reducer，将其 action 与 subject 相关联
  */
 function createReducer({ namespace, reducers = {}, state: initialState }): Reducer {
-  const converted = {};
+  const converted = {
+    // 内置一个 setState 的 reducer 给 effects 里的 thisType 用
+    [`${namespace}/setState`]: (state, payload: Partial<typeof state>) => ({
+      ...state,
+      ...payload,
+    }),
+  };
 
   Object.keys(reducers).forEach((actionType: string) => {
     if (EFFECT_THIS_KEYS.includes(actionType)) {
@@ -55,6 +69,14 @@ function createMiddleware<T extends ModelConfig>({ namespace, reducers, effects 
         next,
         // 将当前 model 的 state 直接获取了传参，方便开发人员获取
         prevState: store.getState()[namespace],
+        // 从 store 中获取最新的 state 数据
+        getState(): T['state'] {
+          return store.getState()[namespace];
+        },
+        // 更新 state 状态，直接调用内置的 setState reducer 方法
+        setState(state: Partial<T['state']>) {
+          store.dispatch({ type: `${namespace}/setState`, payload: state });
+        },
         // 简化 store.dispatch() 方法的调用
         dispatcher(actionType: string, payload?: any) {
           store.dispatch({ type: actionType, payload });

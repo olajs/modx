@@ -17,6 +17,11 @@ const model = createModel({
     minus: (state) => ({ ...state, counter: state.counter - 1 }),
   },
   effects: {
+    init() {
+      console.log('init before setState:', this.getState());
+      this.setState({ counter: 1 });
+      console.log('init after setState:', this.getState());
+    },
     async plusAsync(timeout: number) {
       const { counting } = this.prevState;
       if (counting) return;
