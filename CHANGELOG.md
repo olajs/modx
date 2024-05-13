@@ -1,5 +1,9 @@
 # changelog
 
+# v3.0.6
+
+- fix: 状态更新去掉 `sameValue` 判断
+
 ## v3.0.5
 
 - feat: 为 `effects` 和 `dispatchers` 新增 `getState` 和 `setState` 快捷方法

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useStore } from 'react-redux';
 import { ModelConfig, Store, GetDispatchers } from './types';
-import { sameValue } from './utils';
 import { createSingleStore } from '.';
 
 enum StoreType {
@@ -85,17 +84,16 @@ function useModelCommon<
       : store.getState()[namespace],
   );
   const [dispatchers] = useState(() => getDispatchers(store, modelConfig));
+
   useEffect(() => {
     return store.subscribe(() => {
       const newState =
         selector && typeof selector === 'function'
           ? selector(store.getState()[namespace])
           : store.getState()[namespace];
-      if (!sameValue(state, newState)) {
-        setState(newState);
-      }
+      setState(newState);
     });
-  }, [state]);
+  }, [store]);
 
   return { store, state, dispatchers };
 }
