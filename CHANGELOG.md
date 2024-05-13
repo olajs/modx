@@ -1,5 +1,9 @@
 # changelog
 
+# v3.0.7
+
+- feat: 优化 `hooks` 的 `setState`
+
 # v3.0.6
 
 - fix: 状态更新去掉 `sameValue` 判断
