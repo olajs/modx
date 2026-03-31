@@ -228,7 +228,17 @@ export function getDispatchers<S extends Store, T extends ModelConfig>(store: S,
 
   if (modelConfig.effects) {
     Object.keys(modelConfig.effects).forEach((key) => {
-      result[key] = (payload: any) => store.dispatch({ type: `${namespace}/${key}`, payload });
+      result[key] = (payload: any) => {
+        return new Promise((resolve) => {
+          store.dispatch({
+            type: `${namespace}/${key}`,
+            payload,
+            __callback: (res: any) => {
+              resolve(res);
+            },
+          });
+        });
+      };
     });
   }
 

@@ -26,16 +26,26 @@ export const model = createModel({
   },
   effects: {
     test1(arg1: string) {
-      console.log(arg1);
+      console.log('test1():', arg1);
     },
     test2() {
-      console.log('no parameters');
+      console.log('test2():', 'no parameters');
     },
     async test3() {
-      console.log('async no parameters');
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          console.log('test3():');
+          resolve('async no parameters');
+        }, 2000);
+      });
     },
     async test4(arg1: number) {
-      console.log(arg1);
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          console.log('test4():', arg1);
+          resolve('async with parameters');
+        }, 1000);
+      });
     },
   },
 });

@@ -2,9 +2,7 @@
 
 Modx is a lightweight library to help developer use redux in a simple way.
 
-Just create a `model`, you can use it in `global redux state`,
-`Class Component` and `Function Component` , also easy to write
-`Unit Test` for `model` with `jest`.
+Just create a `model`, you can use it in `global redux state`, `Class Component` and `Function Component` , also easy to write `Unit Test` for `model` with `jest`.
 
 ### Installation
 
@@ -15,14 +13,19 @@ $ yarn add @olajs/modx
 
 ## Usage
 
-- [Create model](#create-model)
-- [Simple use](#simple-use)
-- [Using in React with react-redux](#using-in-react-with-react-redux)
-- [Using in Class Component](#using-in-class-component)
-- [Using in Function Component](#using-in-function-component)
-- [Using async logic](#using-async-logic)
-- [useModel & withModel](#usemodel--withmodel)
-- [shareModel](#sharemodel--selector)
+- [modx](#modx)
+    - [Installation](#installation)
+  - [Usage](#usage)
+    - [Create model](#create-model)
+    - [Simple use](#simple-use)
+    - [Using in React with react-redux](#using-in-react-with-react-redux)
+    - [Using in Class Component](#using-in-class-component)
+    - [Using in Function Component](#using-in-function-component)
+    - [Using async logic](#using-async-logic)
+  - [useModel \& withModel](#usemodel--withmodel)
+  - [shareModel \& selector](#sharemodel--selector)
+  - [Thanks](#thanks)
+  - [License](#license)
 
 ### Create model
 
@@ -233,8 +236,7 @@ export default useSingleModelB;
 
 Simple way of `useGlobalModel/withGlobalModel` (global state) and `useSingleModel/withSingleModel` (component state) methods.
 
-When use `useModel` hooks (since modx@2.1.2), `modx` will use `model` in global state first, if not exists, `modx`
-will create a local state for it.
+When use `useModel` hooks (since modx@2.1.2), `modx` will use `model` in global state first, if not exists, `modx` will create a local state for it.
 
 ```typescript jsx
 import React from 'react';
@@ -268,10 +270,7 @@ export default UseModelExample;
 
 > since @olajs/modx@3.x
 
-In some situation, more than one component will share some states which are not in global state.
-Then you can use `useShareModel/withShareModel`，`shareModel` will create each `modelConfig` file
-per store. So use `useShareModel/withShareModel` in different components with same `modelConfig` file
-will get same store object, states and dispatchers of this store will be shared in these components.
+In some situation, more than one component will share some states which are not in global state. Then you can use `useShareModel/withShareModel`，`shareModel` will create each `modelConfig` file per store. So use `useShareModel/withShareModel` in different components with same `modelConfig` file will get same store object, states and dispatchers of this store will be shared in these components.
 
 For example：
 

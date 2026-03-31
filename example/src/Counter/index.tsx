@@ -1,10 +1,13 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useSingleModel, UseModelResult, withModel } from '@olajs/modx';
 import model from './model';
 
 function Counter() {
   console.log('counter rendered');
   const { state, dispatchers } = useSingleModel(model);
+  useEffect(() => {
+    dispatchers.init();
+  }, [dispatchers]);
   return (
     <div>
       <p>

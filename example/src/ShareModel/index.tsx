@@ -19,14 +19,17 @@ const Comp2 = withShareModel(model)<Props>(
     },
     any
   > {
+    async componentDidMount() {
+      const { dispatchers } = this.props.model;
+      dispatchers.test1('test1');
+      dispatchers.test2();
+      console.log(await dispatchers.test3());
+      console.log(await dispatchers.test4(1));
+    }
+
     render() {
       console.log('share comp2 rendered');
       const { state, dispatchers } = this.props.model;
-
-      dispatchers.test1('test1');
-      dispatchers.test2();
-      dispatchers.test3();
-      dispatchers.test4(1);
 
       return (
         <span>

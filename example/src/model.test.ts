@@ -18,12 +18,16 @@ it('initial state', () => {
 
 it('test dispatchers', async () => {
   const dispatchers = getDispatchers(store, model);
+  let result: any;
 
   dispatchers.init();
+  await dispatchers.initAsync();
   expect(store.getState()[model.namespace]).toMatchObject({
     counter: 1,
     counting: true,
   });
+  dispatchers.setCounting(false);
+  await dispatchers.initAsync();
 
   dispatchers.plus();
   expect(store.getState()[model.namespace].counter).toBe(2);
@@ -36,22 +40,24 @@ it('test dispatchers', async () => {
   dispatchers.setCounting(false);
   expect(store.getState()[model.namespace].counting).toBe(false);
 
-  dispatchers.plusAsync(1000);
-  expect(store.getState()[model.namespace].counter).toBe(1);
+  result = await dispatchers.plusAsync(200);
+  expect(result).toBe(2);
+  expect(store.getState()[model.namespace].counter).toBe(2);
   await new Promise((resolve) => {
     setTimeout(() => {
       expect(store.getState()[model.namespace].counter).toBe(2);
       resolve(true);
-    }, 1000);
+    }, 200);
   });
 
-  dispatchers.minusAsync(1000);
-  expect(store.getState()[model.namespace].counter).toBe(2);
+  result = await dispatchers.minusAsync(200);
+  expect(result).toBe(1);
+  expect(store.getState()[model.namespace].counter).toBe(1);
   await new Promise((resolve) => {
     setTimeout(() => {
       expect(store.getState()[model.namespace].counter).toBe(1);
       resolve(true);
-    }, 1000);
+    }, 200);
   });
 
   dispatchers.setState({

@@ -17,6 +17,10 @@ const model = createModel({
     minus: (state) => ({ ...state, counter: state.counter - 1 }),
   },
   effects: {
+    async init() {
+      console.log('after plusAsync():', await this.plusAsync(2000));
+      console.log('after minusAsync():', await this.minusAsync(1000));
+    },
     plusAsync(timeout: number) {
       const { counting } = this.prevState;
       if (counting) return;
@@ -24,20 +28,26 @@ const model = createModel({
       console.log(typeof this.minusAsync);
 
       this.setCounting(true);
-      setTimeout(() => {
-        this.plus();
-        this.setCounting(false);
-      }, timeout);
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          this.plus();
+          this.setCounting(false);
+          resolve(this.getState().counter);
+        }, timeout);
+      });
     },
     minusAsync(timeout: number) {
       const { counting } = this.prevState;
       if (counting) return;
 
       this.setCounting(true);
-      setTimeout(() => {
-        this.minus();
-        this.setCounting(false);
-      }, timeout);
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          this.minus();
+          this.setCounting(false);
+          resolve(this.getState().counter)
+        }, timeout);
+      });
     },
   },
 });

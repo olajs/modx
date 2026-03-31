@@ -37,7 +37,7 @@ function createReducer({ namespace, reducers = {}, state: initialState }): Reduc
         if (process.env.NODE_ENV === 'development' && window.__MODX_SHOW_LOG__) {
           console.log(`[modx]`, action);
         }
-      } catch (e) {}
+      } catch (e) { }
       return converted[action.type](state, action.payload);
     }
 
@@ -51,59 +51,71 @@ function createReducer({ namespace, reducers = {}, state: initialState }): Reduc
 function createMiddleware<T extends ModelConfig>({ namespace, reducers, effects }: T): Middleware {
   const converted: any = {};
 
+  type Action = {
+    type: string;
+    payload: any;
+    __callback?: (res: any) => void;
+  };
+
   effects &&
     Object.keys(effects).forEach((actionType) => {
       if (EFFECT_THIS_KEYS.includes(actionType)) {
         throw new Error(`[modx: ${namespace}] effects can not have method named "${actionType}"`);
       }
-      converted[`${namespace}/${actionType}`] = effects[actionType];
+      converted[`${namespace}/${actionType}`] = (thisObj: any, action: Action) => {
+        const result = effects[actionType].call(thisObj, action.payload);
+        action.__callback?.(result);
+      };
     });
 
-  return (store) => (next) => (action) => {
+  return (store) => (next) => (action: Action) => {
     next(action);
     if (converted.hasOwnProperty(action.type)) {
       // 为 effects 的 this 变量注入额外的内容
-      const thisType = {
-        namespace,
-        store,
-        next,
-        // 将当前 model 的 state 直接获取了传参，方便开发人员获取
-        prevState: store.getState()[namespace],
-        // 从 store 中获取最新的 state 数据
-        getState(): T['state'] {
-          return store.getState()[namespace];
-        },
-        // 更新 state 状态，直接调用内置的 setState reducer 方法
-        setState(state: Partial<T['state']>) {
-          store.dispatch({ type: `${namespace}/setState`, payload: state });
-        },
-        // 简化 store.dispatch() 方法的调用
-        dispatcher(actionType: string, payload?: any) {
-          store.dispatch({ type: actionType, payload });
-        },
-      };
-
-      // reducers 的快捷方法
-      Object.keys(reducers).forEach((key) => {
-        thisType[key] = (payload: any) => {
-          store.dispatch({ type: `${namespace}/${key}`, payload });
+      const createThisObject = () => {
+        const thisObject = {
+          namespace,
+          store,
+          next,
+          // 将当前 model 的 state 直接获取了传参，方便开发人员获取
+          prevState: store.getState()[namespace],
+          // 从 store 中获取最新的 state 数据
+          getState(): T['state'] {
+            return store.getState()[namespace];
+          },
+          // 更新 state 状态，直接调用内置的 setState reducer 方法
+          setState(state: Partial<T['state']>) {
+            store.dispatch({ type: `${namespace}/setState`, payload: state });
+          },
+          // 简化 store.dispatch() 方法的调用
+          dispatcher(actionType: string, payload?: any) {
+            store.dispatch({ type: actionType, payload });
+          },
         };
-      });
-
-      // effects 的快捷方法
-      effects &&
-        Object.keys(effects).forEach((key) => {
-          thisType[key] = (payload: any) => {
+  
+        // reducers 的快捷方法
+        Object.keys(reducers).forEach((key) => {
+          thisObject[key] = (payload: any) => {
             store.dispatch({ type: `${namespace}/${key}`, payload });
           };
         });
+  
+        // effects 的快捷方法
+        effects &&
+          Object.keys(effects).forEach((key) => {
+            thisObject[key] = (payload: any) => {
+              return effects[key].call(createThisObject(), payload);
+            };
+          });
+        return thisObject;
+      }
 
       try {
         if (process.env.NODE_ENV === 'development' && window.__MODX_SHOW_LOG__) {
           console.log(`[modx]`, action);
         }
-      } catch (e) {}
-      converted[action.type].call(thisType, action.payload);
+      } catch (e) { }
+      converted[action.type](createThisObject(), action);
     }
   };
 }

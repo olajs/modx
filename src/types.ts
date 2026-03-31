@@ -17,10 +17,6 @@ type ReducerFunction<State, FunctionValue> = FunctionValue extends (state: State
   ? (payload: Args) => void
   : never;
 
-type EffectFunction<FunctionValue> = FunctionValue extends (payload?: any) => void
-  ? FunctionValue
-  : (payload?: any) => void;
-
 export type CreateModelOptions<Namespace, State, Reducers, Effects> = {
   namespace: Namespace;
   state: State;
@@ -35,7 +31,7 @@ export type CreateModelOptions<Namespace, State, Reducers, Effects> = {
       {
         [key in keyof Reducers]: ReducerFunction<State, Reducers[key]>;
       } & {
-        [key in keyof Effects]: EffectFunction<Effects[key]>;
+        [key in keyof Effects]: Effects[key];
       } & {
         namespace: Namespace;
         store: Readonly<Store>;
@@ -45,7 +41,7 @@ export type CreateModelOptions<Namespace, State, Reducers, Effects> = {
         // 从 store 中获取最新的 state 数据
         getState(): State;
         // 更新 state 状态，直接调用内置的 setState reducer 方法
-        setState(state: Partial<State>);
+        setState(state: Partial<State>): void;
         // 简化 store.dispatch() 方法的调用
         dispatcher(actionType: string, payload?: any): void;
       }
@@ -55,14 +51,12 @@ export type CreateModelOptions<Namespace, State, Reducers, Effects> = {
 
 export type GetDispatchers<State, Reducers, Effects> = Readonly<
   {
-    [key in keyof Effects]: Effects[key] extends (payload?: any) => any
-      ? (...args: Parameters<Effects[key]>) => void
-      : Effects[key];
+    [key in keyof Effects]: Effects[key];
   } & {
     [key in keyof Reducers]: ReducerFunction<State, Reducers[key]>;
   } & {
     getState(): State;
-    setState(state: Partial<State>);
+    setState(state: Partial<State>): void;
   }
 >;
 

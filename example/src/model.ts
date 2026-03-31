@@ -20,28 +20,39 @@ const model = createModel({
     init() {
       console.log('init state from getState:', this.getState());
       this.setState({ counter: 1, counting: true });
+      console.log('init state from getState:', this.getState());
     },
-    plusAsync(timeout: number) {
+    async initAsync() {
+      console.log('plusAsync:', await this.plusAsync(500));
+      console.log('minusAsync:', await this.minusAsync(200));
+    },
+    async plusAsync(timeout: number) {
       const { counting } = this.prevState;
       if (counting) return;
 
-      console.log(typeof this.minusAsync);
+      console.log('typeof this.minusAsync', typeof this.minusAsync);
 
       this.setCounting(true);
-      setTimeout(() => {
-        this.plus();
-        this.setCounting(false);
-      }, timeout);
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          this.plus();
+          this.setCounting(false);
+          resolve(this.getState().counter);
+        }, timeout);
+      });
     },
     minusAsync(timeout: number) {
       const { counting } = this.prevState;
       if (counting) return;
 
       this.setCounting(true);
-      setTimeout(() => {
-        this.minus();
-        this.setCounting(false);
-      }, timeout);
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          this.minus();
+          this.setCounting(false);
+          resolve(this.getState().counter)
+        }, timeout);
+      });
     },
   },
 });

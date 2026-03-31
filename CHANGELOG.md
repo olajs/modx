@@ -1,10 +1,14 @@
 # changelog
 
-# v3.0.7
+## v3.1.0
+
+- feat: 保留 `effects` 方法异步特征，可以使用 `await this.effectName()` 或者 `await dispatchers.effectName()` 调用异步 `effects` 方法
+
+## v3.0.7
 
 - feat: 优化 `hooks` 的 `setState`
 
-# v3.0.6
+## v3.0.6
 
 - fix: 状态更新去掉 `sameValue` 判断
 

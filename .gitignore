@@ -108,3 +108,5 @@ yarn.lock
 lib
 .idea
 .vscode
+.npmrc
+.DS_Store
